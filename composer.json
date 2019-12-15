@@ -1,0 +1,13 @@
+{
+  "name": "Proc Open Threading",
+  "autoload": {
+    "psr-4": {
+      "ProcOpenThreading\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "ProcOpenThreading\\test\\": "test/"
+    }
+  }
+}
