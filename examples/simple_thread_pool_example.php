@@ -14,14 +14,15 @@ $work = range(1, 30);
 $pool = new ThreadWorkerPool(
     $threadScript,
     new WorkQueue($work),
-    16,
-    120,
-    function($data) {
-        echo "Pool $data" . PHP_EOL;
-    },
-    function(ErrorException $e) {
-        echo $e->getTraceAsString() . PHP_EOL;
-    }
+    [
+        "threads" => 2,
+        "done" => function($data) {
+            echo "Pool $data" . PHP_EOL;
+        },
+        "error" => function(ErrorException $e) {
+            echo $e->getTraceAsString() . PHP_EOL;
+        }
+    ]
 );
 
 $start = microtime(true);

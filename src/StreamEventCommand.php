@@ -11,7 +11,7 @@ use \Exception;
  */
 abstract class StreamEventCommand
 {
-    const DEATH_SIGNAL = "18ss!L4dR8Hr";
+    const DEATH_SIGNAL = "F3FB149707E0B5B61C86DBC012DF5EC0";
     /**
      * @var callable|null
      */
@@ -35,6 +35,7 @@ abstract class StreamEventCommand
         $stdin = fopen('php://stdin', 'r');
         stream_set_blocking($stdin, 0);
         stream_set_blocking(STDERR, 0);
+        stream_set_timeout($stdin, 10);
         $this->setupErrorHandler();
 
         while (true) {
@@ -44,14 +45,11 @@ abstract class StreamEventCommand
             stream_select($read, $write, $except, null);
             $f = fgets(STDIN);
             //don't try to unserialize if we have nothing ready from STDIN, this will save cpu cycles
-            if ($f == "") {
-                continue;
+            if ($f === "") {
+                exit(0);
             }
             $data = unserialize($f);
-            if ($data == false) {
-                continue;
-            }
-            if ($data == self::DEATH_SIGNAL) {
+            if ($data === self::DEATH_SIGNAL) {
                 exit(0);
             }
             try {
@@ -77,6 +75,6 @@ abstract class StreamEventCommand
      */
     public function write($data)
     {
-        echo serialize($data);
+        echo serialize($data) . PHP_EOL;
     }
 }

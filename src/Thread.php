@@ -36,6 +36,10 @@ class Thread
      * @var string
      */
     private $command;
+    /**
+     * @var mixed
+     */
+    private $jobData;
 
     /**
      * @param string $command
@@ -185,5 +189,21 @@ class Thread
     public function getDurationSeconds()
     {
         return time() - $this->start_time;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getJobData()
+    {
+        return $this->jobData;
+    }
+
+    /**
+     * @param mixed $jobData
+     */
+    public function setJobData($jobData)
+    {
+        $this->jobData = $jobData;
     }
 }
