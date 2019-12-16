@@ -1,13 +1,13 @@
 <?php
 
-namespace ProcOpenThreading;
+namespace aventri\ProcOpenMultiprocessing;
 
 use ErrorException;
 use \Exception;
 
 /**
- * Inside a thread script, StreamEventCommand interacts with the ThreadWorkerPool through streams.
- * @package ProcOpenThreading
+ * Inside a process script, StreamEventCommand interacts with the WorkerPool through streams.
+ * @package aventri\Multiprocessing;
  */
 abstract class StreamEventCommand
 {
@@ -43,12 +43,15 @@ abstract class StreamEventCommand
             $write = NULL;
             $except = NULL;
             stream_select($read, $write, $except, null);
-            $f = fgets(STDIN);
+            $buffer = "";
+            while($f = stream_get_contents(STDIN)) {
+                $buffer .= $f;
+            }
             //don't try to unserialize if we have nothing ready from STDIN, this will save cpu cycles
-            if ($f === "") {
+            if ($buffer === "") {
                 exit(0);
             }
-            $data = unserialize($f);
+            $data = unserialize($buffer);
             if ($data === self::DEATH_SIGNAL) {
                 exit(0);
             }

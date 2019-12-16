@@ -1,13 +1,14 @@
 {
-  "name": "Proc Open Threading",
+  "name": "Proc Open Multi Processing",
   "autoload": {
     "psr-4": {
-      "ProcOpenThreading\\": "src/"
+      "aventri\\ProcOpenMultiprocessing\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "ProcOpenThreading\\test\\": "test/"
+      "aventri\\ProcOpenMultiprocessing\\test\\": "test/",
+      "aventri\\ProcOpenMultiprocessing\\Example\\": "example/"
     }
   }
 }

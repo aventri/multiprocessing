@@ -1,8 +1,10 @@
 <?php
 
+use aventri\ProcOpenMultiprocessing\StreamEventCommand;
+
 include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
 
-use ProcOpenThreading\StreamEventCommand;
+
 
 (new class extends StreamEventCommand
 {

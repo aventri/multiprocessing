@@ -1,8 +1,9 @@
 <?php
 
-include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
+use aventri\ProcOpenMultiprocessing\Example\Steps\Step1;
+use aventri\ProcOpenMultiprocessing\StreamEventCommand;
 
-use ProcOpenThreading\StreamEventCommand;
+include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
 
 (new class extends StreamEventCommand
 {
@@ -30,10 +31,14 @@ use ProcOpenThreading\StreamEventCommand;
     public function consume($data)
     {
         $number = (int)$data;
-        if ($number == 5) {
-//            trigger_error("hi");
-        }
-        $this->write($this->fibo($number));
+        $step1 = new Step1();
+        $step1->pid = $this->pid;
+        $step1->originalNumber = $number;
+        $startTime = microtime(true);
+        $step1->value = $this->fibo($number);
+        $totalTime = microtime(true) - $startTime;
+        $step1->totalTime = $totalTime;
+        $this->write($step1);
     }
 })->listen();
 

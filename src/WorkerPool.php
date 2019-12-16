@@ -1,24 +1,24 @@
 <?php
 
-namespace ProcOpenThreading;
+namespace aventri\ProcOpenMultiprocessing;
 
 /**
- * @package ProcOpenThreading
+ * @package aventri\Multiprocessing;
  */
-class ThreadWorkerPool
+class WorkerPool
 {
     /**
      * @var int
      */
-    private $numThreads = 1;
+    private $numProcs = 1;
     /**
      * @var string
      */
     private $command;
     /**
-     * @var Thread[]
+     * @var Process[]
      */
-    private $threads = array();
+    private $procs = array();
     /**
      * @var WorkQueue
      */
@@ -26,7 +26,7 @@ class ThreadWorkerPool
     /**
      * @var int
      */
-    private $threadTimeout = 120;
+    private $procTimeout = 120;
     /**
      * @var array
      */
@@ -86,11 +86,11 @@ class ThreadWorkerPool
         $this->command = $command;
         $this->retryData = new WorkQueue();
         $this->workQueue = $workQueue;
-        if (isset($options["threads"]) && is_int($options["threads"])) {
-            $this->numThreads = $options["threads"];
+        if (isset($options["procs"]) && is_int($options["procs"])) {
+            $this->numProcs = $options["procs"];
         }
-        if (isset($options["thread_timeout"]) && is_int($options["thread_timeout"])) {
-            $this->threadTimeout = $options["thread_timeout"];
+        if (isset($options["proc_timeout"]) && is_int($options["proc_timeout"])) {
+            $this->procTimeout = $options["proc_timeout"];
         }
         if (isset($options["done"]) && is_callable($options["done"])) {
             $this->doneHandler = $options["done"];
@@ -115,7 +115,7 @@ class ThreadWorkerPool
                 $this->workQueue->enqueue($item);
             }
             while ($this->workQueue->size() > 0) {
-                $this->createThreads();
+                $this->createProcs();
                 $this->sendJobs();
                 $this->process();
             }
@@ -125,12 +125,12 @@ class ThreadWorkerPool
             }
         }
 
-        for($i = 0; $i < count($this->threads); $i++){
-            $this->threads[$i]->tell(serialize(StreamEventCommand::DEATH_SIGNAL));
-            $this->closeThread($i);
+        for($i = 0; $i < count($this->procs); $i++){
+            $this->procs[$i]->tell(serialize(StreamEventCommand::DEATH_SIGNAL));
+            $this->closeProc($i);
         }
 
-        $this->threads = array_values(array_filter($this->threads));
+        $this->procs = array_values(array_filter($this->procs));
         $this->stdoutPipes = array_values(array_filter($this->stdoutPipes));
         $this->stderrPipes = array_values(array_filter($this->stderrPipes));
 
@@ -147,30 +147,30 @@ class ThreadWorkerPool
             if (is_null($id)) {
                 break;
             }
-            $thread = $this->threads[$id];
-            $thread->tell(serialize(StreamEventCommand::DEATH_SIGNAL));
+            $proc = $this->procs[$id];
+            $proc->tell(serialize(StreamEventCommand::DEATH_SIGNAL));
             $close[] = $id;
         }
         foreach ($close as $id) {
-            $this->closeThread($id);
+            $this->closeProc($id);
         }
-        $this->threads = array_values(array_filter($this->threads));
+        $this->procs = array_values(array_filter($this->procs));
         $this->stdoutPipes = array_values(array_filter($this->stdoutPipes));
         $this->stderrPipes = array_values(array_filter($this->stderrPipes));
     }
 
-    public final function createThreads()
+    public final function createProcs()
     {
         if (
-        (count($this->threads) < $this->workQueue->size())
+        (count($this->procs) < $this->workQueue->size())
         ) {
-            $threadsToCreate = min($this->numThreads, $this->workQueue->size()) - count($this->threads);
-            for ($x = 0; $x < $threadsToCreate; $x++) {
-                $thread = new Thread($this->command, $this->threadTimeout);
-                $this->free[] = count($this->threads);
-                $this->threads[] = $thread;
-                $thread->start();
-                $pipes = $thread->getPipes();
+            $procsToCreate = min($this->numProcs, $this->workQueue->size()) - count($this->procs);
+            for ($x = 0; $x < $procsToCreate; $x++) {
+                $proc = new Process($this->command, $this->procTimeout);
+                $this->free[] = count($this->procs);
+                $this->procs[] = $proc;
+                $proc->start();
+                $pipes = $proc->getPipes();
                 $this->stdoutPipes[] = $pipes[1];
                 $this->stderrPipes[] = $pipes[2];
             }
@@ -185,62 +185,63 @@ class ThreadWorkerPool
             if (is_null($id)) {
                 break;
             }
-            $thread = $this->threads[$id];
-            if (is_null($thread)) {
+            $proc = $this->procs[$id];
+            if (is_null($proc)) {
                 continue;
             }
             if ($this->workQueue->size() > 0) {
                 $item = $this->workQueue->dequeue();
                 $jobData = serialize($item);
                 $this->runningJobs++;
-                $thread->setJobData($item);
-                $thread->tell($jobData);
+                $proc->setJobData($item);
+                $proc->tell($jobData);
             } else {
-                $thread->tell(serialize(StreamEventCommand::DEATH_SIGNAL));
+                $proc->tell(serialize(StreamEventCommand::DEATH_SIGNAL));
                 $close[] = $id;
             }
         }
         foreach ($close as $id) {
-            $this->closeThread($id);
+            $this->closeProc($id);
         }
-        $this->threads = array_values(array_filter($this->threads));
+        $this->procs = array_values(array_filter($this->procs));
         $this->stdoutPipes = array_values(array_filter($this->stdoutPipes));
         $this->stderrPipes = array_values(array_filter($this->stderrPipes));
     }
 
-    private function closeThread($id)
+    private function closeProc($id)
     {
         fclose($this->stdoutPipes[$id]);
         fclose($this->stderrPipes[$id]);
-        $this->threads[$id]->close();
-        $this->threads[$id] = null;
+        $this->procs[$id]->close();
+        $this->procs[$id] = null;
         $this->stdoutPipes[$id] = null;
         $this->stderrPipes[$id] = null;
     }
 
     public final function stdOut($id)
     {
-        $thread = $this->threads[$id];
-        if ($thread->isActive()) {
-            $data = unserialize($thread->listen());
+        $proc = $this->procs[$id];
+        $this->runningJobs--;
+        if ($proc->isActive()) {
+            $data = unserialize($proc->listen());
             $this->collected[] = $data;
             $this->free[] = $id;
             if (is_callable($this->doneHandler)) {
                 call_user_func($this->doneHandler, $data);
             }
+            return $data;
         }
-        $this->runningJobs--;
     }
 
     public final function stdErr($id)
     {
-        $thread = $this->threads[$id];
-        $this->retryData->enqueue($thread->getJobData());
-        if (!$thread->isActive()) {
-            $this->closeThread($id);
+        $proc = $this->procs[$id];
+        $this->retryData->enqueue($proc->getJobData());
+        if (!$proc->isActive()) {
+            $this->closeProc($id);
             return;
         }
-        $errorTxt = $thread->getError();
+        $errorTxt = $proc->getError();
         $error = unserialize($errorTxt);
         $this->errors[] = $error;
         $this->runningJobs--;
@@ -278,7 +279,7 @@ class ThreadWorkerPool
     public final function closeShouldClose()
     {
         foreach ($this->shouldClose as $id) {
-            $this->closeThread($id);
+            $this->closeProc($id);
         }
         $this->shouldClose = array();
     }
@@ -313,5 +314,13 @@ class ThreadWorkerPool
     public function getRunningJobs()
     {
         return $this->runningJobs;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCollected()
+    {
+        return $this->collected;
     }
 }

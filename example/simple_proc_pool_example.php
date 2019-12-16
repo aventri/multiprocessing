@@ -1,21 +1,18 @@
 <?php
 
-use ProcOpenThreading\StreamEventCommand;
-use ProcOpenThreading\Thread;
-use ProcOpenThreading\ThreadWorkerPool;
-use ProcOpenThreading\WorkQueue;
-
+use aventri\ProcOpenMultiprocessing\WorkerPool;
+use aventri\ProcOpenMultiprocessing\WorkQueue;
 
 include realpath(__DIR__ . "/../vendor/") . "/autoload.php";
-$threadScript = "php " . realpath(__DIR__) . "/thread_scripts/fibo_thread.php";
+$workScript = "php " . realpath(__DIR__) . "/proc_scripts/fibo_proc.php";
 
 //create some data to work on, we will calculate fibonacci numbers for these
 $work = range(1, 30);
-$pool = new ThreadWorkerPool(
-    $threadScript,
+$pool = new WorkerPool(
+    $workScript,
     new WorkQueue($work),
     [
-        "threads" => 2,
+        "procs" => 5,
         "done" => function($data) {
             echo "Pool $data" . PHP_EOL;
         },
@@ -25,9 +22,5 @@ $pool = new ThreadWorkerPool(
     ]
 );
 
-$start = microtime(true);
 $collected = $pool->start();
-$time = microtime(true) - $start;
 print_r($collected);
-//50.007667064667
-echo $time . PHP_EOL;

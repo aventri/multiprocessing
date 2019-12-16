@@ -1,8 +1,8 @@
 <?php
 
-namespace ProcOpenThreading;
+namespace aventri\ProcOpenMultiprocessing;
 
-class Thread
+class Process
 {
     /**
      * @var resource
@@ -44,19 +44,6 @@ class Thread
     /**
      * @param string $command
      * @param int $timeout
-     * @return Thread
-     */
-    static function Create($command, $timeout = 120)
-    {
-        $t = new Thread($command, $timeout);
-        $t->start();
-        return $t;
-    }
-
-    /**
-     * Thread constructor.
-     * @param string $command
-     * @param int $timeout
      */
     public function __construct($command = "", $timeout = 120)
     {
@@ -71,7 +58,7 @@ class Thread
     }
 
     /**
-     * Start the thread
+     * Start the proc
      * @return bool
      */
     public function start()
