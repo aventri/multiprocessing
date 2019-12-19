@@ -81,6 +81,6 @@ abstract class StreamEventCommand
      */
     public function write($data)
     {
-        echo serialize($data) . PHP_EOL;
+        echo serialize($data);
     }
 }

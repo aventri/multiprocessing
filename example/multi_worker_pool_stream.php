@@ -43,7 +43,7 @@ $pipeline = new WorkerPoolPipeline([
         $step3,
         new WorkQueue(),
         [
-            "procs" => 1,
+            "procs" => 8,
             "done" => function (StepInterface $step) {
                 echo "Pool 3: " . $step->getResult() . PHP_EOL;
                 echo "Whole Process took: " . $step->getTime() . PHP_EOL;
@@ -55,7 +55,5 @@ $pipeline = new WorkerPoolPipeline([
     )
 ]);
 
-$start = microtime(true);
 $collected = $pipeline->start();
-$time = microtime(true) - $start;
 print_r($collected);
