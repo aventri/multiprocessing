@@ -16,7 +16,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.2 5c3e80d, 2017-08-06"
-   sodipodi:docname="drawing.svg">
+   sodipodi:docname="logo.svg">
   <defs
      id="defs2">
     <linearGradient
@@ -120,7 +120,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -189,7 +189,7 @@
        inkscape:label="Layer 5"
        style="display:inline">
       <path
-         style="fill:url(#linearGradient900);fill-opacity:1;stroke:#000000;stroke-width:0.19891621px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         style="fill:url(#linearGradient900);fill-opacity:1;stroke:none;stroke-width:0.19891621px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m 121.36322,211.01042 23.00725,64.49217 h 28.75906 l -23.00725,-64.49217 z"
          id="path886"
          inkscape:connector-curvature="0"
@@ -201,7 +201,7 @@
        inkscape:label="Layer 6"
        style="display:inline">
       <path
-         style="fill:url(#linearGradient908);fill-opacity:1;stroke:#000000;stroke-width:0.19891621px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         style="fill:url(#linearGradient908);fill-opacity:1;stroke:none;stroke-width:0.19891621px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m 144.37047,275.50259 23.00725,-64.49217 h 28.75906 l -23.00725,64.49217 z"
          id="path889"
          inkscape:connector-curvature="0"

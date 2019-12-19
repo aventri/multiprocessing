@@ -1,5 +1,5 @@
 {
-  "name": "Proc Open Multi Processing",
+  "name": "Proc Open Multiprocessing",
   "autoload": {
     "psr-4": {
       "aventri\\ProcOpenMultiprocessing\\": "src/"
