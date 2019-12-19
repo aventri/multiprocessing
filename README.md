@@ -14,3 +14,7 @@
   <strong>structured</strong> set of PHP libraries.<br />
   Moreover, Hoa aims at being a bridge between industrial and research worlds.
 </p>
+
+TODO:
+* Add RateLimitedQueue
+* Add PCNTL Example

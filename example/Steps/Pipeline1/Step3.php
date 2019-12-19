@@ -1,8 +1,8 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing\Example\Steps;
+namespace aventri\ProcOpenMultiprocessing\Example\Steps\Pipeline1;
 
-class Step2 implements StepInterface
+class Step3 implements StepInterface
 {
     public $value;
     public $pid;

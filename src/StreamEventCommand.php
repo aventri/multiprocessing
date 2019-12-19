@@ -2,12 +2,13 @@
 
 namespace aventri\ProcOpenMultiprocessing;
 
-use ErrorException;
+use aventri\ProcOpenMultiprocessing\Exceptions\ChildErrorException;
+use aventri\ProcOpenMultiprocessing\Exceptions\ChildException;
 use \Exception;
 
 /**
  * Inside a process script, StreamEventCommand interacts with the WorkerPool through streams.
- * @package aventri\Multiprocessing;
+ * @package aventri\ProcOpenMultiprocessing;
  */
 abstract class StreamEventCommand
 {
@@ -20,7 +21,7 @@ abstract class StreamEventCommand
     private function setupErrorHandler()
     {
         $errorHandler = function($severity, $message, $file, $line) {
-            $exception = serialize(new ErrorException($message, 0, $severity, $file, $line));
+            $exception = serialize(new ChildErrorException($message, 0, $severity, $file, $line));
             fwrite(STDERR, $exception);
             exit(1);
         };
@@ -32,6 +33,7 @@ abstract class StreamEventCommand
      */
     public function listen()
     {
+        ob_end_clean();
         $stdin = fopen('php://stdin', 'r');
         stream_set_blocking($stdin, 0);
         stream_set_blocking(STDERR, 0);
@@ -44,12 +46,12 @@ abstract class StreamEventCommand
             $except = NULL;
             stream_select($read, $write, $except, null);
             $buffer = "";
-            while($f = stream_get_contents(STDIN)) {
+            while($f = stream_get_contents($stdin)) {
                 $buffer .= $f;
             }
             //don't try to unserialize if we have nothing ready from STDIN, this will save cpu cycles
             if ($buffer === "") {
-                exit(0);
+                continue;
             }
             $data = unserialize($buffer);
             if ($data === self::DEATH_SIGNAL) {
@@ -58,7 +60,8 @@ abstract class StreamEventCommand
             try {
                 $this->consume($data);
             } catch (Exception $e) {
-                $exception = serialize($e);
+                $ex = new ChildException($e);
+                $exception = serialize($ex);
                 fwrite(STDERR, $exception);
                 exit(1);
             }

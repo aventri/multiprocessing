@@ -2,8 +2,10 @@
 
 namespace aventri\ProcOpenMultiprocessing;
 
+use aventri\ProcOpenMultiprocessing\Queues\WorkQueue;
+
 /**
- * @package aventri\Multiprocessing;
+ * @package aventri\ProcOpenMultiprocessing;
  */
 class WorkerPool
 {
@@ -161,9 +163,7 @@ class WorkerPool
 
     public final function createProcs()
     {
-        if (
-        (count($this->procs) < $this->workQueue->size())
-        ) {
+        if (count($this->procs) < $this->workQueue->size()) {
             $procsToCreate = min($this->numProcs, $this->workQueue->size()) - count($this->procs);
             for ($x = 0; $x < $procsToCreate; $x++) {
                 $proc = new Process($this->command, $this->procTimeout);

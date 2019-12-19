@@ -10,5 +10,10 @@
       "aventri\\ProcOpenMultiprocessing\\test\\": "test/",
       "aventri\\ProcOpenMultiprocessing\\Example\\": "example/"
     }
+  },
+  "require-dev": {
+      "ext-json": "*",
+      "ext-curl": "*",
+      "szymach/c-pchart": "^3.0"
   }
 }

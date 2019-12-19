@@ -1,7 +1,7 @@
 <?php
 
-use aventri\ProcOpenMultiprocessing\Example\Steps\Step2;
-use aventri\ProcOpenMultiprocessing\Example\Steps\StepInterface;
+use aventri\ProcOpenMultiprocessing\Example\Steps\Pipeline1\Step3;
+use aventri\ProcOpenMultiprocessing\Example\Steps\Pipeline1\StepInterface;
 use aventri\ProcOpenMultiprocessing\StreamEventCommand;
 
 include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
@@ -18,7 +18,7 @@ include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
         $this->pid = getmypid();
     }
 
-    private function wasteTime($value)
+    private function wasteMoreTime($value)
     {
         $result = 1;
         for($i = 1; $i < 10000000; $i++) {
@@ -33,13 +33,13 @@ include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
      */
     public function consume($step)
     {
-        $step2 = new Step2($step);
-        $step2->pid = $this->pid;
+        $step3 = new Step3($step);
+        $step3->pid = $this->pid;
         $startTime = microtime(true);
-        $step2->value = $this->wasteTime($step->value);
+        $step3->value = $this->wasteMoreTime($step->value);
         $totalTime = microtime(true) - $startTime;
-        $step2->totalTime = $totalTime;
-        $this->write($step2);
+        $step3->totalTime = $totalTime;
+        $this->write($step3);
     }
 })->listen();
 

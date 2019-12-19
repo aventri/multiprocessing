@@ -1,6 +1,6 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing;
+namespace aventri\ProcOpenMultiprocessing\Queues;
 
 use SplQueue;
 
@@ -15,7 +15,7 @@ class WorkQueue extends SplQueue
     /**
      * @var int
      */
-    private $size = 0;
+    protected $size = 0;
 
     /**
      * WorkQueue constructor.
