@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./aventri-logo-horizontal.svg" alt="Aventri" width="50%" />  
+  <img src="./logo.svg" alt="Proc Open Multiprocessing" width="50%" />  
 </p>
 
 ---
@@ -10,7 +10,7 @@
   <a href="https://packagist.org/packages/hoa/eventsource"><img src="https://img.shields.io/packagist/dt/hoa/eventsource.svg" alt="Packagist" /></a>  
 </p>
 <p align="center">
-  Hoa is a <strong>modular</strong>, <strong>extensible</strong> and
+  Proc Open Multiprocessing is a <strong>modular</strong>, <strong>extensible</strong> and
   <strong>structured</strong> set of PHP libraries.<br />
   Moreover, Hoa aims at being a bridge between industrial and research worlds.
 </p>

@@ -9,13 +9,18 @@ class RateLimitedQueue extends WorkQueue
     /**
      * @var DateInterval
      */
-    private DateInterval $timeFrame;
+    private $timeFrame;
 
     private $timeQueue = array();
+    /**
+     * @var int
+     */
+    private $numAllowed;
 
-    public function __construct($numAllowed, DateInterval $timeFrame, $jobData = array())
+    public function __construct(DateInterval $timeFrame, $numAllowed = 1, $jobData = array())
     {
         $this->timeFrame = $timeFrame;
+        $this->numAllowed = $numAllowed;
         parent::__construct($jobData);
     }
 
