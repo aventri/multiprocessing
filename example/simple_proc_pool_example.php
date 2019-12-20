@@ -6,7 +6,7 @@ use aventri\ProcOpenMultiprocessing\WorkerPool;
 
 include realpath(__DIR__ . "/../vendor/") . "/autoload.php";
 
-$workScript = "php -dauto_prepend_file= " . realpath(__DIR__) . "/proc_scripts/fibo_proc.php";
+$workScript = "php  " . realpath(__DIR__) . "/proc_scripts/fibo_proc.php";
 
 $collected = (new WorkerPool(
     $workScript,
