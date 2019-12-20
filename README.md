@@ -20,7 +20,7 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
 
 8 Process Fibonacci Example:
 ---------
-Create a child process script using the *StreamEventCommand* class.  
+Create a child process script `fibo.php` using the **StreamEventCommand** class.  
 ```php
 (new class extends StreamEventCommand
 {
@@ -44,7 +44,7 @@ Create a child process script using the *StreamEventCommand* class.
 Create a WorkerPool instance with 8 workers.
 ```php
 $collected = (new WorkerPool(
-    $workScript,
+    "php fibo.php",
     new WorkQueue(range(1, 30)),
     [
         "procs" => 8,
