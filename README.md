@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./logo.svg" alt="Proc Open Multiprocessing" width="50%" />  
+  <img src="https://raw.githubusercontent.com/aventri/proc-open-multiprocessing/master/logo.svg" alt="Proc Open Multiprocessing" width="30%" />  
 </p>
 
 ---
@@ -10,8 +10,9 @@
   <a href="https://packagist.org/packages/aventri/proc-open-multiprocessing"><img src="https://img.shields.io/packagist/dt/aventri/proc-open-multiprocessing.svg" alt="Packagist" /></a>  
 </p>
 <p align="center">
-  Proc Open Multiprocessing is a <strong>modular</strong>, <strong>extensible</strong> and
-  <strong>structured</strong> set of PHP libraries.<br />
+  Proc Open Multiprocessing is a <strong>powerful</strong>, <strong>simple</strong> and
+  <strong>structured</strong> PHP library for multiprocessing.<br /> 
+  Proc Open Multiprocessing relies on streams for communication with sub processes with no requirement on the PCNTL extension. 
 </p>
 
 TODO:
