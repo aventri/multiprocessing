@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/aventri/proc-open-multiprocessing/master/logo.svg" alt="Proc Open Multiprocessing" width="30%" />  
+  <img src="https://raw.githubusercontent.com/aventri/proc-open-multiprocessing/master/logo.svg?sanitize=true" alt="Proc Open Multiprocessing" width="30%" />  
 </p>
 
 ---
