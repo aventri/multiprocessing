@@ -48,12 +48,8 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
         new WorkQueue(range(1, 30)),
         [
             "procs" => 8,
-            "done" => function($data) {
-                echo $data . PHP_EOL;
-            },
-            "error" => function(Exception $e) {
-                echo $e->getTraceAsString() . PHP_EOL;
-            }
+            "done" => fn($data) => print($data . PHP_EOL),
+            "error" => fn(Exception $e) => print($e->getTraceAsString() . PHP_EOL)            
         ]
     ))->start();
     ```
