@@ -59,10 +59,23 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
     ```
 
 ---
-| More Examples |         
-| ---       | 
-[Simple Proc Pool](https://github.com/aventri/proc-open-multiprocessing/blob/master/example/simple_proc_pool_example.php) |
-[WorkerPool Pipeline](https://github.com/aventri/proc-open-multiprocessing/blob/master/example/multi_worker_pool_stream.php) |
-[AlphaVantage API - Draw Stock Charts Pipeline](https://github.com/aventri/proc-open-multiprocessing/blob/master/example/alpha_vantage_charts_stream.php) |
-[Fibo Rate Limited](https://github.com/aventri/proc-open-multiprocessing/blob/master/example/rate_limited_example.php) |
-[Rate Limited Pipeline](https://github.com/aventri/proc-open-multiprocessing/blob/master/example/rate_limited_pipeline.php) |
+| Main Script | Workers |
+| ---         | --- | 
+[Simple Proc Pool]|[Fibo Proc]
+[WorkerPool Pipeline]|[Step 1 Fibo] -> [Step 2 Waste Time] -> [Step 3 Waste More Time]
+[AlphaVantage API - Draw Stock Charts Pipeline]|[Download Stock Data] -> [Draw Stock Charts]
+[Fibo Rate Limited]|[Fibo Proc]
+[Rate Limited Pipeline]|[Step 1 Fibo] -> [Step 2 Waste Time] -> [Step 3 Waste More Time]
+
+
+[Simple Proc Pool]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/simple_proc_pool_example.php>
+[WorkerPool Pipeline]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/multi_worker_pool_stream.php>
+[AlphaVantage API - Draw Stock Charts Pipeline]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/alpha_vantage_charts_stream.php>
+[Fibo Rate Limited]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/rate_limited_example.php>
+[Rate Limited Pipeline]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/rate_limited_pipeline.php>
+[Fibo Proc]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/fibo_proc.php>  
+[Step 1 Fibo]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/pipeline_1_step1.php>
+[Step 2 Waste Time]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/pipeline_1_step2.php>
+[Step 3 Waste More Time]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/pipeline_1_step3.php>
+[Download Stock Data]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/pipeline_2_step1.php>
+[Draw Stock Charts]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/pipeline_2_step2.php>
