@@ -18,8 +18,8 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
   <a href="https://packagist.org/packages/aventri/proc-open-multiprocessing"><img src="https://img.shields.io/packagist/dt/aventri/proc-open-multiprocessing.svg" alt="Packagist" /></a>  
 </p>
 
-8 Process Fibonacci Example:
----------
+##8 Process Fibonacci Example:
+
 1. Create a child process script `fibo.php` using the **StreamEventCommand** class.  
     ```php
     (new class extends StreamEventCommand
@@ -57,8 +57,9 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
         ]
     ))->start();
     ```
-
 ---
+##More Examples:
+
 | Main Script | Workers |
 | ---         | --- | 
 [Simple Proc Pool]|[Fibo Proc]
