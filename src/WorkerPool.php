@@ -105,6 +105,13 @@ class WorkerPool
         }
     }
 
+    private function resetProcs()
+    {
+        $this->procs = array_values(array_filter($this->procs));
+        $this->stdoutPipes = array_values(array_filter($this->stdoutPipes));
+        $this->stderrPipes = array_values(array_filter($this->stderrPipes));
+    }
+
     /**
      * Start the work pool
      * @return array
@@ -112,11 +119,11 @@ class WorkerPool
     public function start()
     {
         for ($i = 0; $i < $this->numRetries; $i++) {
-            while ($this->retryData->size() > 0) {
+            while ($this->retryData->count() > 0) {
                 $item = $this->retryData->dequeue();
                 $this->workQueue->enqueue($item);
             }
-            while ($this->workQueue->size() > 0) {
+            while ($this->workQueue->count() > 0) {
                 $this->createProcs();
                 $this->sendJobs();
                 $this->process();
@@ -132,9 +139,7 @@ class WorkerPool
             $this->closeProc($i);
         }
 
-        $this->procs = array_values(array_filter($this->procs));
-        $this->stdoutPipes = array_values(array_filter($this->stdoutPipes));
-        $this->stderrPipes = array_values(array_filter($this->stderrPipes));
+        $this->resetProcs();
 
         $this->free = array();
 
@@ -156,15 +161,13 @@ class WorkerPool
         foreach ($close as $id) {
             $this->closeProc($id);
         }
-        $this->procs = array_values(array_filter($this->procs));
-        $this->stdoutPipes = array_values(array_filter($this->stdoutPipes));
-        $this->stderrPipes = array_values(array_filter($this->stderrPipes));
+        $this->resetProcs();
     }
 
     public final function createProcs()
     {
-        if (count($this->procs) < $this->workQueue->size()) {
-            $procsToCreate = min($this->numProcs, $this->workQueue->size()) - count($this->procs);
+        if (count($this->procs) < $this->workQueue->count()) {
+            $procsToCreate = min($this->numProcs, $this->workQueue->count()) - count($this->procs);
             for ($x = 0; $x < $procsToCreate; $x++) {
                 $proc = new Process($this->command, $this->procTimeout);
                 $this->free[] = count($this->procs);
@@ -189,7 +192,7 @@ class WorkerPool
             if (is_null($proc)) {
                 continue;
             }
-            if ($this->workQueue->size() > 0) {
+            if ($this->workQueue->count() > 0) {
                 $item = $this->workQueue->dequeue();
                 $jobData = serialize($item);
                 $this->runningJobs++;
@@ -203,9 +206,7 @@ class WorkerPool
         foreach ($close as $id) {
             $this->closeProc($id);
         }
-        $this->procs = array_values(array_filter($this->procs));
-        $this->stdoutPipes = array_values(array_filter($this->stdoutPipes));
-        $this->stderrPipes = array_values(array_filter($this->stderrPipes));
+        $this->resetProcs();
     }
 
     private function closeProc($id)

@@ -1,5 +1,6 @@
 {
-  "name": "Proc Open Multiprocessing",
+  "name": "aventri/proc-open-multiprocessing",
+  "description": "Multiprocessing library using proc_open",
   "autoload": {
     "psr-4": {
       "aventri\\ProcOpenMultiprocessing\\": "src/"
@@ -12,8 +13,13 @@
     }
   },
   "require-dev": {
-      "ext-json": "*",
-      "ext-curl": "*",
-      "szymach/c-pchart": "^3.0"
+    "ext-json": "*",
+    "ext-curl": "*",
+    "szymach/c-pchart": "^3.0",
+    "phpunit/phpunit": "6.5.14",
+    "doctrine/instantiator": "1.0.5"
+  },
+  "require": {
+    "php": ">=5.3"
   }
 }

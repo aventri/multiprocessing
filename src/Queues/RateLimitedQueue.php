@@ -3,6 +3,8 @@
 namespace aventri\ProcOpenMultiprocessing\Queues;
 
 use DateInterval;
+use DateTime;
+use SplQueue;
 
 class RateLimitedQueue extends WorkQueue
 {
@@ -10,8 +12,10 @@ class RateLimitedQueue extends WorkQueue
      * @var DateInterval
      */
     private $timeFrame;
-
-    private $timeQueue = array();
+    /**
+     * @var SplQueue
+     */
+    private $timeQueue;
     /**
      * @var int
      */
@@ -21,11 +25,25 @@ class RateLimitedQueue extends WorkQueue
     {
         $this->timeFrame = $timeFrame;
         $this->numAllowed = $numAllowed;
+        $this->timeQueue = new SplQueue();
         parent::__construct($jobData);
     }
 
     public function dequeue()
     {
+        if ($this->timeQueue->count() === $this->numAllowed) {
+            $now = new DateTime();
+            /** @var DateTime $start */
+            $start = $this->timeQueue->bottom();
+            $end = $start->add($this->timeFrame);
+            $diff = $end->getTimestamp() - $now->getTimestamp();
+            if ($diff > 0) {
+                return null;
+            }
+            $this->timeQueue->dequeue();
+        }
+
+        $this->timeQueue->enqueue(new DateTime());
         return parent::dequeue();
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use aventri\ProcOpenMultiprocessing\Queues\RateLimitedQueue;
 use aventri\ProcOpenMultiprocessing\Queues\WorkQueue;
 use aventri\ProcOpenMultiprocessing\WorkerPool;
 
