@@ -20,43 +20,43 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
 
 8 Process Fibonacci Example:
 ---------
-Create a child process script `fibo.php` using the **StreamEventCommand** class.  
-```php
-(new class extends StreamEventCommand
-{
-    private function fibo($number)
+1. Create a child process script `fibo.php` using the **StreamEventCommand** class.  
+    ```php
+    (new class extends StreamEventCommand
     {
-        if ($number == 0) {
-            return 0;
-        } else if ($number == 1) {
-            return 1;
+        private function fibo($number)
+        {
+            if ($number == 0) {
+                return 0;
+            } else if ($number == 1) {
+                return 1;
+            }
+    
+            return ($this->fibo($number - 1) + $this->fibo($number - 2));
         }
-
-        return ($this->fibo($number - 1) + $this->fibo($number - 2));
-    }
-
-    public function consume($number)
-    {
-        $this->write($this->fibo($number));
-    }
-})->listen();
-```
-Create a WorkerPool instance with 8 workers.
-```php
-$collected = (new WorkerPool(
-    "php fibo.php",
-    new WorkQueue(range(1, 30)),
-    [
-        "procs" => 8,
-        "done" => function($data) {
-            echo $data . PHP_EOL;
-        },
-        "error" => function(Exception $e) {
-            echo $e->getTraceAsString() . PHP_EOL;
+    
+        public function consume($number)
+        {
+            $this->write($this->fibo($number));
         }
-    ]
-))->start();
-```
+    })->listen();
+    ```
+2. Create a WorkerPool instance with 8 workers.
+    ```php
+    $collected = (new WorkerPool(
+        "php fibo.php",
+        new WorkQueue(range(1, 30)),
+        [
+            "procs" => 8,
+            "done" => function($data) {
+                echo $data . PHP_EOL;
+            },
+            "error" => function(Exception $e) {
+                echo $e->getTraceAsString() . PHP_EOL;
+            }
+        ]
+    ))->start();
+    ```
 
 
 
