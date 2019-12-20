@@ -4,6 +4,7 @@ namespace aventri\ProcOpenMultiprocessing;
 
 use aventri\ProcOpenMultiprocessing\Exceptions\ChildErrorException;
 use aventri\ProcOpenMultiprocessing\Exceptions\ChildException;
+use DateTime;
 use \Exception;
 
 /**
@@ -57,6 +58,10 @@ abstract class StreamEventCommand
             if ($data === self::DEATH_SIGNAL) {
                 exit(0);
             }
+            if ($data instanceof WakeTime) {
+                $this->wakeUpAt($data);
+                continue;
+            }
             try {
                 $this->consume($data);
             } catch (Exception $e) {
@@ -66,6 +71,15 @@ abstract class StreamEventCommand
                 exit(1);
             }
         }
+    }
+
+    private final function wakeUpAt(WakeTime $time)
+    {
+        $now = new DateTime();
+        if($time->getTime() > $now->getTimestamp() + 2) {
+            time_sleep_until($time->getTime());
+        }
+        $this->write($time);
     }
 
     /**

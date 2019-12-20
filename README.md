@@ -17,12 +17,47 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
   <!--<a href="https://scrutinizer-ci.com/g/aventri/proc-open-multiprocessing/?branch=master"><img src="https://scrutinizer-ci.com/g/aventri/proc-open-multiprocessing/badges/quality-score.png?b=master" /></a>-->
   <a href="https://packagist.org/packages/aventri/proc-open-multiprocessing"><img src="https://img.shields.io/packagist/dt/aventri/proc-open-multiprocessing.svg" alt="Packagist" /></a>  
 </p>
-<p align="center">
-  
-</p>
+
+8 Process Fibonacci Example:
+---------
+Create a child process script using the *StreamEventCommand* class.  
+```php
+(new class extends StreamEventCommand
+{
+    private function fibo($number)
+    {
+        if ($number == 0) {
+            return 0;
+        } else if ($number == 1) {
+            return 1;
+        }
+
+        return ($this->fibo($number - 1) + $this->fibo($number - 2));
+    }
+
+    public function consume($number)
+    {
+        $this->write($this->fibo($number));
+    }
+})->listen();
+```
+Create a WorkerPool instance with 8 workers.
+```php
+$collected = (new WorkerPool(
+    $workScript,
+    new WorkQueue(range(1, 30)),
+    [
+        "procs" => 8,
+        "done" => function($data) {
+            echo $data . PHP_EOL;
+        },
+        "error" => function(Exception $e) {
+            echo $e->getTraceAsString() . PHP_EOL;
+        }
+    ]
+))->start();
+```
 
 
 
-TODO:
-* Add RateLimitedQueue
-* Add PCNTL Example
+

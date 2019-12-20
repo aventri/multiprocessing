@@ -32,9 +32,6 @@ include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
     public function consume($data)
     {
         $number = (int)$data;
-        if ($number % 5 == 0) {
-//            trigger_error($this->pid);
-        }
         $this->write("PID: $this->pid Original Number: $number FIBO: " . $this->fibo($number));
     }
 })->listen();

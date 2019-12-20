@@ -25,14 +25,14 @@ class WorkerPoolPipeline
     {
         $allSize = 0;
         foreach ($this->procWorkerPools as $pool) {
-            $allSize += $pool->getWorkQueue()->size();
+            $allSize += $pool->getWorkQueue()->count();
             $allSize += $pool->getRunningJobs();
         }
 
         while ($allSize > 0) {
             $allSize = 0;
             foreach ($this->procWorkerPools as $pool) {
-                $allSize += $pool->getWorkQueue()->size();
+                $allSize += $pool->getWorkQueue()->count();
                 $allSize += $pool->getRunningJobs();
                 $pool->createProcs();
                 $pool->sendJobs();
@@ -79,8 +79,10 @@ class WorkerPoolPipeline
                 $this->procWorkerPools[$whichPool]->stdErr($procId);
             } else {
                 $data = $this->procWorkerPools[$whichPool]->stdOut($procId);
-                if (isset($this->procWorkerPools[$whichPool + 1])) {
-                    $this->procWorkerPools[$whichPool + 1]->getWorkQueue()->enqueue($data);
+                if (!is_null($data)) {
+                    if (isset($this->procWorkerPools[$whichPool + 1])) {
+                        $this->procWorkerPools[$whichPool + 1]->getWorkQueue()->enqueue($data);
+                    }
                 }
             }
         }

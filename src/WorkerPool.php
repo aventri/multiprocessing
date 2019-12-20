@@ -2,6 +2,7 @@
 
 namespace aventri\ProcOpenMultiprocessing;
 
+use aventri\ProcOpenMultiprocessing\Queues\RateLimitedQueue;
 use aventri\ProcOpenMultiprocessing\Queues\WorkQueue;
 
 /**
@@ -194,10 +195,17 @@ class WorkerPool
             }
             if ($this->workQueue->count() > 0) {
                 $item = $this->workQueue->dequeue();
-                $jobData = serialize($item);
-                $this->runningJobs++;
-                $proc->setJobData($item);
-                $proc->tell($jobData);
+                if (is_null($item) and $this->workQueue instanceof RateLimitedQueue) {
+                    $jobData = serialize($this->workQueue->getWakeTime());
+                    $this->runningJobs++;
+                    $proc->setJobData($item);
+                    $proc->tell($jobData);
+                } else {
+                    $jobData = serialize($item);
+                    $this->runningJobs++;
+                    $proc->setJobData($item);
+                    $proc->tell($jobData);
+                }
             } else {
                 $proc->tell(serialize(StreamEventCommand::DEATH_SIGNAL));
                 $close[] = $id;
@@ -224,9 +232,12 @@ class WorkerPool
         $proc = $this->procs[$id];
         $this->runningJobs--;
         if ($proc->isActive()) {
-            $data = unserialize($proc->listen());
-            $this->collected[] = $data;
             $this->free[] = $id;
+            $data = unserialize($proc->listen());
+            if ($data instanceof WakeTime) {
+                return null;
+            }
+            $this->collected[] = $data;
             if (is_callable($this->doneHandler)) {
                 call_user_func($this->doneHandler, $data);
             }

@@ -2,6 +2,7 @@
 
 namespace aventri\ProcOpenMultiprocessing\Queues;
 
+use aventri\ProcOpenMultiprocessing\WakeTime;
 use DateInterval;
 use DateTime;
 use SplQueue;
@@ -29,12 +30,22 @@ class RateLimitedQueue extends WorkQueue
         parent::__construct($jobData);
     }
 
+    public function getWakeTime()
+    {
+        /** @var DateTime $start */
+        $start = clone $this->timeQueue->bottom();
+        $end = $start->add($this->timeFrame);
+        $wake = new WakeTime();
+        $wake->setTime($end->getTimestamp());
+        return $wake;
+    }
+
     public function dequeue()
     {
         if ($this->timeQueue->count() === $this->numAllowed) {
             $now = new DateTime();
             /** @var DateTime $start */
-            $start = $this->timeQueue->bottom();
+            $start = clone $this->timeQueue->bottom();
             $end = $start->add($this->timeFrame);
             $diff = $end->getTimestamp() - $now->getTimestamp();
             if ($diff > 0) {
