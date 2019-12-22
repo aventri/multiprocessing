@@ -75,6 +75,22 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
 [Fibo Rate Limited]|[Fibo Proc]
 [Rate Limited Pipeline]|[Step 1 Fibo] -> [Step 2 Waste Time] -> [Step 3 Waste More Time]
 
+## Debugging Child Processes
+If you use `xdebug` to debug your php code with a remote interpreter you can debug both the parent and child script by adding adding
+the debug line provided by the `Debug` class.
+
+```php 
+//create the debug string
+$phpCommand = Debug::cli(["remote_port" => 9000, "serverName" => "SomeName"]);
+//use this in your command string
+$cmd = "$phpCommand fibo.php";
+$collected = (new WorkerPool(
+    $cmd,
+    new WorkQueue(range(1, 30)),
+    ["procs" => 8]
+))->start();
+```  
+If you are using PHPStorm to debug you can now use the `serverName` as your `server` configuration and set up path mappings.
 
 [Simple Proc Pool]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/simple_proc_pool_example.php>
 [WorkerPool Pipeline]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/multi_worker_pool_stream.php>

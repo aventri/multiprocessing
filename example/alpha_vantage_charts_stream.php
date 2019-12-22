@@ -7,10 +7,8 @@ use aventri\ProcOpenMultiprocessing\Queues\WorkQueue;
 
 include realpath(__DIR__."/../vendor/")."/autoload.php";
 
-
-$debug = "PHP_IDE_CONFIG='serverName=SomeName' php -dxdebug.remote_enable=1 -dxdebug.remote_mode=req -dxdebug.remote_port=9010 -dxdebug.remote_host=host.docker.internal -dauto_prepend_file= ";
-$step1 = "$debug ".realpath(__DIR__)."/proc_scripts/pipeline_2_step1.php";
-$step2 = "$debug ".realpath(__DIR__)."/proc_scripts/pipeline_2_step2.php";
+$step1 = "php ".realpath(__DIR__)."/proc_scripts/pipeline_2_step1.php";
+$step2 = "php ".realpath(__DIR__)."/proc_scripts/pipeline_2_step2.php";
 
 $result = (new WorkerPoolPipeline([
     new WorkerPool(

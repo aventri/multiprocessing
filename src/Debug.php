@@ -12,7 +12,7 @@ final class Debug
         "xdebug.remote_enable" => 1,
         "xdebug.remote_mode" => "req",
         "xdebug.remote_port" => 9000,
-        "xdebug.remote_host" => "host.dokcer.internal"
+        "xdebug.remote_host" => "host.docker.internal"
     );
 
     public static function cli($options = array())
