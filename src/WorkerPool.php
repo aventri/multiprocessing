@@ -255,7 +255,7 @@ class WorkerPool
         }
         $errorTxt = $proc->getError();
         $error = unserialize($errorTxt);
-        if ($error === false and strpos($errorTxt, "cannot open shared object file") > -1) {
+        if ($error === false) {
             return;
         }
         $this->retryData->enqueue($proc->getJobData());
