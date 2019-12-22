@@ -1,6 +1,6 @@
 # Proc Open Multiprocessing
 
-<img src="https://raw.githubusercontent.com/aventri/proc-open-multiprocessing/master/logo.svg?sanitize=true" alt="Proc Open Multiprocessing" width="30%" align="left"/>
+<img src="https://aventri.github.io/proc-open-multiprocessing/logo.svg" alt="Proc Open Multiprocessing" width="30%" align="left"/>
 Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</strong> and
   <strong>structured</strong> PHP library for multiprocessing and async communication using streams.<br /> 
   PM relies on streams for communication with sub processes with no requirement on the PCNTL extension.  
@@ -17,6 +17,15 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
   <!--<a href="https://scrutinizer-ci.com/g/aventri/proc-open-multiprocessing/?branch=master"><img src="https://scrutinizer-ci.com/g/aventri/proc-open-multiprocessing/badges/quality-score.png?b=master" /></a>-->
   <a href="https://packagist.org/packages/aventri/proc-open-multiprocessing"><img src="https://img.shields.io/packagist/dt/aventri/proc-open-multiprocessing.svg" alt="Packagist" /></a>  
 </p>
+
+## Features
+* Stream based multiprocessing using `worker` scripts 
+* Auto process scaling with `queues`
+* `Pipeline` processing with auto scaled steps
+* Parent process receives child `stack trace` in asynchronous error handler
+* Non blocking `rate limited queues` 
+* Simplified child script `debugging`
+
 
 ## 8 Process Fibonacci Example:
 
