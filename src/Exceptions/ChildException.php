@@ -1,6 +1,6 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing\Exceptions;
+namespace aventri\Multiprocessing\Exceptions;
 
 use Exception;
 use ReflectionClass;

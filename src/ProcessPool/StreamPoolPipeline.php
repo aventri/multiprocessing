@@ -1,26 +1,11 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing;
+namespace aventri\Multiprocessing\ProcessPool;
 
 use InvalidArgumentException;
 
-class WorkerPoolPipeline
+class StreamPoolPipeline extends PoolPipeline
 {
-    /**
-     * @var WorkerPool[]
-     */
-    private $procWorkerPools;
-
-    public function __construct($pools = array())
-    {
-        foreach ($pools as $pool) {
-            if (!($pool instanceof WorkerPool)) {
-                throw new InvalidArgumentException("PoolStream accepts a list of WorkerPool instances");
-            }
-        }
-        $this->procWorkerPools = $pools;
-    }
-
     public function start()
     {
         $allSize = 0;
@@ -44,7 +29,7 @@ class WorkerPoolPipeline
         return $this->procWorkerPools[count($this->procWorkerPools) - 1]->getCollected();
     }
 
-    private function process()
+    protected function process()
     {
         $poolIndex = array();
         $stdIndex = array();

@@ -1,6 +1,6 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing\Example\Steps\Pipeline2;
+namespace aventri\Multiprocessing\Example\Steps\Pipeline2;
 
 class AlphaVantage
 {

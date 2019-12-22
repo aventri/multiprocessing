@@ -1,14 +1,14 @@
 <?php
 
-use aventri\ProcOpenMultiprocessing\Example\Steps\Pipeline2\AlphaVantage;
-use aventri\ProcOpenMultiprocessing\StreamEventCommand;
+use aventri\Multiprocessing\Example\Steps\Pipeline2\AlphaVantage;
+use aventri\Multiprocessing\Task;
 use CpChart\Chart\Stock;
 use CpChart\Data;
 use CpChart\Image;
 
 include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
 
-(new class extends StreamEventCommand
+(new class extends Task
 {
     /**
      * @param AlphaVantage $alphaVantage

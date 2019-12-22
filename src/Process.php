@@ -1,21 +1,21 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing;
+namespace aventri\Multiprocessing;
 
 class Process
 {
     /**
      * @var resource
      */
-    private $pref; // process reference
+    private $pref;
     /**
      * @var array
      */
-    private $pipes; // stdio
+    private $pipes;
     /**
      * @var string
      */
-    private $buffer; // output buffer
+    private $buffer;
     /**
      * @var string
      */
@@ -52,7 +52,6 @@ class Process
         $this->pipes = (array)null;
         $this->output = "";
         $this->error = "";
-        $this->start_time = time();
         $this->timeout = $timeout;
         $this->command = $command;
     }
@@ -71,6 +70,7 @@ class Process
             // stderr
             2 => array("pipe", "w")
         );
+        $this->start_time = time();
         //Open the resource to execute $command
         $this->pref = proc_open($this->command, $descriptor, $this->pipes);
         //Set STDOUT and STDERR to non-blocking

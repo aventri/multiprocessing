@@ -1,7 +1,7 @@
 <?php
 
-use aventri\ProcOpenMultiprocessing\Process;
-use aventri\ProcOpenMultiprocessing\StreamEventCommand;
+use aventri\Multiprocessing\Process;
+use aventri\Multiprocessing\StreamEventCommand;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

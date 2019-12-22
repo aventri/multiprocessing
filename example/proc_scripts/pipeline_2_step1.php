@@ -1,11 +1,11 @@
 <?php
 
-use aventri\ProcOpenMultiprocessing\Example\Steps\Pipeline2\AlphaVantage;
-use aventri\ProcOpenMultiprocessing\StreamEventCommand;
+use aventri\Multiprocessing\Example\Steps\Pipeline2\AlphaVantage;
+use aventri\Multiprocessing\Task;
 
 include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
 
-(new class extends StreamEventCommand
+(new class extends Task
 {
     private $url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=%s&outputsize=full&apikey=%s";
     private $api_key = "DJ5RATXFWLK0W4MS";

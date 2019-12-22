@@ -1,6 +1,6 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing\Example\Steps\Pipeline1;
+namespace aventri\Multiprocessing\Example\Steps\Pipeline1;
 
 class Step2 implements StepInterface
 {
