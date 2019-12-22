@@ -248,13 +248,17 @@ class WorkerPool
     public final function stdErr($id)
     {
         $proc = $this->procs[$id];
-        $this->retryData->enqueue($proc->getJobData());
         if (!$proc->isActive()) {
+            $this->retryData->enqueue($proc->getJobData());
             $this->closeProc($id);
             return;
         }
         $errorTxt = $proc->getError();
         $error = unserialize($errorTxt);
+        if ($error === false and strpos($errorTxt, "cannot open shared object file") > -1) {
+            return;
+        }
+        $this->retryData->enqueue($proc->getJobData());
         $this->errors[] = $error;
         $this->runningJobs--;
         if (is_callable($this->errorHandler)) {

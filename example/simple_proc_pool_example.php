@@ -1,12 +1,14 @@
 <?php
 
+use aventri\ProcOpenMultiprocessing\Debug;
 use aventri\ProcOpenMultiprocessing\Queues\RateLimitedQueue;
 use aventri\ProcOpenMultiprocessing\Queues\WorkQueue;
 use aventri\ProcOpenMultiprocessing\WorkerPool;
 
 include realpath(__DIR__ . "/../vendor/") . "/autoload.php";
 
-$workScript = "php  " . realpath(__DIR__) . "/proc_scripts/fibo_proc.php";
+$debug = Debug::cli(["xdebug.remote_port" => 9010]);
+$workScript =  "$debug  " . realpath(__DIR__) . "/proc_scripts/fibo_proc.php";
 $collected = (new WorkerPool(
     $workScript,
     new WorkQueue(range(1, 30)),
