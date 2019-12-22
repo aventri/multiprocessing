@@ -3,11 +3,11 @@
 namespace aventri\Multiprocessing\Tasks;
 
 use aventri\Multiprocessing\Exceptions\ChildErrorException;
-use aventri\Multiprocessing\WakeTime;
+use aventri\Multiprocessing\IPC\WakeTime;
 use DateTime;
 use Exception;
 
-abstract class EventCommand
+abstract class EventTask
 {
     const DEATH_SIGNAL = "F3FB149707E0B5B61C86DBC012DF5EC0";
     /**

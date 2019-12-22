@@ -26,7 +26,12 @@ final class Debug
             $serverName = $options["serverName"];
             unset($options["serverName"]);
         }
-        $string = "PHP_IDE_CONFIG='serverName=$serverName' php";
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $string = 'set PHP_IDE_CONFIG="serverName=' . $serverName. '" && php';
+        } else {
+            $string = "PHP_IDE_CONFIG='serverName=$serverName' php";
+        }
+
 
         $params = array_merge(self::$defaultParameters, $options);
         foreach ($params as $key => $val) {

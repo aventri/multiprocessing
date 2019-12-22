@@ -2,7 +2,7 @@
 
 namespace aventri\Multiprocessing\Queues;
 
-use aventri\Multiprocessing\WakeTime;
+use aventri\Multiprocessing\IPC\WakeTime;
 use DateInterval;
 use DateTime;
 use SplQueue;

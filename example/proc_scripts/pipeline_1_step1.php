@@ -1,11 +1,11 @@
 <?php
 
 use aventri\Multiprocessing\Example\Steps\Pipeline1\Step1;
-use aventri\Multiprocessing\StreamEventCommand;
+use aventri\Multiprocessing\Task;
 
 include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
 
-(new class extends StreamEventCommand
+(new class extends Task
 {
     /**
      * @var int

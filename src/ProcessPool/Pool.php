@@ -77,6 +77,10 @@ abstract class Pool
      * @var int
      */
     protected $numRetries = 1;
+    /**
+     * @var bool
+     */
+    protected $verbose = false;
 
     /**
      * Options are
@@ -117,6 +121,9 @@ abstract class Pool
         if (isset($options["retries"]) && is_int($options["retries"])) {
             $this->numRetries = $options["retries"];
         }
+        if (isset($options["verbose"]) && is_bool($options["verbose"])) {
+            $this->verbose = $options["verbose"];
+        }
     }
 
     /**
@@ -149,20 +156,31 @@ abstract class Pool
 
     protected abstract function process();
 
+    /**
+     * Creates child processes if there is work to do and we have not reached the process number limit.
+     * @return int[] The child process id's of all created processes
+     */
     public final function createProcs()
     {
+        $new = array();
         if (count($this->procs) < $this->workQueue->count()) {
             $procsToCreate = min($this->numProcs, $this->workQueue->count()) - count($this->procs);
+            if ($this->verbose && $procsToCreate > 0) {
+                echo "Creating: $procsToCreate processes" . PHP_EOL;
+            }
             for ($x = 0; $x < $procsToCreate; $x++) {
                 $proc = new Process($this->command, $this->procTimeout);
-                $this->free[] = count($this->procs);
+                $id = count($this->procs);
+                $this->free[] = $id;
                 $this->procs[] = $proc;
                 $proc->start();
                 $pipes = $proc->getPipes();
                 $this->stdoutPipes[] = $pipes[1];
                 $this->stderrPipes[] = $pipes[2];
+                $new[] = $id;
             }
         }
+        return $new;
     }
 
     protected function closeProc($id)

@@ -1,9 +1,10 @@
-# Proc Open Multiprocessing
+# Multiprocessing
 
 <img src="https://aventri.github.io/proc-open-multiprocessing/logo.svg" alt="Proc Open Multiprocessing" width="30%" align="left"/>
-Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</strong> and
-  <strong>structured</strong> PHP library for multiprocessing and async communication using streams.<br /> 
-  PM relies on streams for communication with sub processes with no requirement on the PCNTL extension.  
+Multiprocessing (MP) is a <strong>powerful</strong>, <strong>simple</strong> and
+  <strong>structured</strong> PHP library for multiprocessing and async communication.<br />
+  MP relies on streams for communication with sub processes with no requirement on the PCNTL extension.
+  On Windows MP requires the PHP sockets extension for inter-process communication.
  
 
 ---
@@ -16,7 +17,7 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
 </p>
 
 ### Features
-* Stream based multiprocessing using `worker` scripts 
+* Stream based or Socket based multiprocessing using `worker` scripts
 * Auto process scaling with `queues`
 * `Pipeline` processing with auto scaled steps
 * Non blocking `rate limited queues` 
@@ -31,9 +32,9 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
 
 ## 8 Process Fibonacci Example:
 
-1. Create a child process script `fibo.php` using the **StreamEventCommand** class.  
+1. Create a child process script `fibo.php` using the **Task** class.
     ```php
-    (new class extends StreamEventCommand
+    (new class extends Task
     {
         private function fibo($number)
         {
@@ -52,17 +53,15 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
         }
     })->listen();
     ```
-2. Create a WorkerPool instance with 8 workers.
+2. Use the `PoolFactory` class to create a Pool instance with 8 workers.
     ```php
-    $collected = (new WorkerPool(
-        "php fibo.php",
-        new WorkQueue(range(1, 30)),
-        [
-            "procs" => 8,
-            "done" => fn($data) => print($data . PHP_EOL),
-            "error" => fn(Exception $e) => print($e->getTraceAsString() . PHP_EOL)            
-        ]
-    ))->start();
+    $collected = (PoolFactory::create([
+        "task" => "php fibo.php",
+        "queue" => new WorkQueue(range(1, 30)),
+        "num_processes" => 8,
+        "done" => fn($data) => print($data . PHP_EOL),
+        "error" => fn(Exception $e) => print($e->getTraceAsString() . PHP_EOL)
+    ]))->start();
     ```
 ---
 ## More Examples:
@@ -84,11 +83,11 @@ the debug line provided by the `Debug` class.
 $phpCommand = Debug::cli(["remote_port" => 9000, "serverName" => "SomeName"]);
 //use this in your command string
 $cmd = "$phpCommand fibo.php";
-$collected = (new WorkerPool(
-    $cmd,
-    new WorkQueue(range(1, 30)),
-    ["procs" => 8]
-))->start();
+$collected = (PoolFactory::create([
+    "task" => $cmd,
+    "queue" => new WorkQueue(range(1, 30)),
+    "num_processes" => 8
+]))->start();
 ```  
 If you are using PHPStorm to debug you can now use the `serverName` as your `server` configuration and set up path mappings.
 

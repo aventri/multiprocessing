@@ -2,17 +2,27 @@
 
 namespace aventri\Multiprocessing\Tasks;
 
-use aventri\Multiprocessing\Exceptions\ChildErrorException;
 use aventri\Multiprocessing\Exceptions\ChildException;
-use DateTime;
+use aventri\Multiprocessing\IPC\WakeTime;
+use aventri\Multiprocessing\Task;
 use \Exception;
 
 /**
- * Inside a process script, StreamEventCommand interacts with the Pool through streams.
+ * Inside a process script, StreamTask interacts with the Pool through streams.
  * @package aventri\Multiprocessing;
  */
-abstract class StreamEventCommand extends EventCommand
+class StreamTask extends EventTask
 {
+    /**
+     * @var Task
+     */
+    private $consumer;
+
+    public function __construct(Task $consumer)
+    {
+        $this->consumer = $consumer;
+    }
+
     public function error(Exception $e)
     {
         fwrite(STDERR, serialize($e));
@@ -62,20 +72,11 @@ abstract class StreamEventCommand extends EventCommand
                 continue;
             }
             try {
-                $this->consume($data);
+                $this->consumer->consume($data);
             } catch (Exception $e) {
                 $ex = new ChildException($e);
-                $exception = serialize($ex);
-                fwrite(STDERR, $exception);
-                exit(1);
+                $this->error($ex);
             }
         }
     }
-
-    /**
-     * When a stream event is received, the consume method is called.
-     * @param mixed $data
-     * @return mixed
-     */
-    abstract function consume($data);
 }

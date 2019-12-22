@@ -2,9 +2,9 @@
 
 namespace aventri\Multiprocessing\ProcessPool;
 
+use aventri\Multiprocessing\IPC\WakeTime;
 use aventri\Multiprocessing\Queues\RateLimitedQueue;
-use aventri\Multiprocessing\Tasks\EventCommand;
-use aventri\Multiprocessing\WakeTime;
+use aventri\Multiprocessing\Tasks\EventTask;
 
 /**
  * @package aventri\Multiprocessing;
@@ -34,7 +34,7 @@ class StreamPool extends Pool
         }
 
         for($i = 0; $i < count($this->procs); $i++){
-            $this->procs[$i]->tell(serialize(EventCommand::DEATH_SIGNAL));
+            $this->procs[$i]->tell(serialize(EventTask::DEATH_SIGNAL));
             $this->closeProc($i);
         }
 
@@ -54,7 +54,7 @@ class StreamPool extends Pool
                 break;
             }
             $proc = $this->procs[$id];
-            $proc->tell(serialize(EventCommand::DEATH_SIGNAL));
+            $proc->tell(serialize(EventTask::DEATH_SIGNAL));
             $close[] = $id;
         }
         foreach ($close as $id) {
@@ -86,10 +86,10 @@ class StreamPool extends Pool
                     $jobData = serialize($item);
                     $this->runningJobs++;
                     $proc->setJobData($item);
-                    $proc->tell($jobData);
+                    $proc->tell($jobData . PHP_EOL);
                 }
             } else {
-                $proc->tell(serialize(EventCommand::DEATH_SIGNAL));
+                $proc->tell(serialize(EventTask::DEATH_SIGNAL));
                 $close[] = $id;
             }
         }
