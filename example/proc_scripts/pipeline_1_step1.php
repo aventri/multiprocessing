@@ -1,7 +1,7 @@
 <?php
 
-use aventri\ProcOpenMultiprocessing\Example\Steps\Pipeline1\Step1;
-use aventri\ProcOpenMultiprocessing\StreamEventCommand;
+use aventri\Multiprocessing\Example\Steps\Pipeline1\Step1;
+use aventri\Multiprocessing\StreamEventCommand;
 
 include realpath(__DIR__ . "/../../vendor/") . "/autoload.php";
 

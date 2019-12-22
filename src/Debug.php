@@ -1,6 +1,6 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing;
+namespace aventri\Multiprocessing;
 
 use InvalidArgumentException;
 

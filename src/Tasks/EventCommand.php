@@ -1,8 +1,9 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing;
+namespace aventri\Multiprocessing\Tasks;
 
-use aventri\ProcOpenMultiprocessing\Exceptions\ChildErrorException;
+use aventri\Multiprocessing\Exceptions\ChildErrorException;
+use aventri\Multiprocessing\WakeTime;
 use DateTime;
 use Exception;
 
@@ -23,6 +24,8 @@ abstract class EventCommand
         };
         $this->oldErrorHandler = set_error_handler($errorHandler, E_ALL);
     }
+
+    public abstract function listen();
 
     public abstract function error(Exception $e);
 

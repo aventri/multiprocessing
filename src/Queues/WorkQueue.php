@@ -1,6 +1,6 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing\Queues;
+namespace aventri\Multiprocessing\Queues;
 
 use SplQueue;
 

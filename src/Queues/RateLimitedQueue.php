@@ -1,8 +1,8 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing\Queues;
+namespace aventri\Multiprocessing\Queues;
 
-use aventri\ProcOpenMultiprocessing\WakeTime;
+use aventri\Multiprocessing\WakeTime;
 use DateInterval;
 use DateTime;
 use SplQueue;

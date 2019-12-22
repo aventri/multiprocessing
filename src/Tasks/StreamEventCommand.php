@@ -1,15 +1,15 @@
 <?php
 
-namespace aventri\ProcOpenMultiprocessing;
+namespace aventri\Multiprocessing\Tasks;
 
-use aventri\ProcOpenMultiprocessing\Exceptions\ChildErrorException;
-use aventri\ProcOpenMultiprocessing\Exceptions\ChildException;
+use aventri\Multiprocessing\Exceptions\ChildErrorException;
+use aventri\Multiprocessing\Exceptions\ChildException;
 use DateTime;
 use \Exception;
 
 /**
- * Inside a process script, StreamEventCommand interacts with the WorkerPool through streams.
- * @package aventri\ProcOpenMultiprocessing;
+ * Inside a process script, StreamEventCommand interacts with the Pool through streams.
+ * @package aventri\Multiprocessing;
  */
 abstract class StreamEventCommand extends EventCommand
 {

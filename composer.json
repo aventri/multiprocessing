@@ -1,15 +1,15 @@
 {
-  "name": "aventri/proc-open-multiprocessing",
-  "description": "Multiprocessing library using proc_open",
+  "name": "aventri/multiprocessing",
+  "description": "Multiprocessing library using streams or unix sockets for inter-process communication.",
   "autoload": {
     "psr-4": {
-      "aventri\\ProcOpenMultiprocessing\\": "src/"
+      "aventri\\Multiprocessing\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "aventri\\ProcOpenMultiprocessing\\test\\": "test/",
-      "aventri\\ProcOpenMultiprocessing\\Example\\": "example/"
+      "aventri\\Multiprocessing\\test\\": "test/",
+      "aventri\\Multiprocessing\\Example\\": "example/"
     }
   },
   "require-dev": {

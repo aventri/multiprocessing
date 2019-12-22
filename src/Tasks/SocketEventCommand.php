@@ -1,14 +1,11 @@
 <?php /** @noinspection PhpComposerExtensionStubsInspection */
 
-namespace aventri\ProcOpenMultiprocessing;
+namespace aventri\Multiprocessing\Tasks;
 
-use aventri\ProcOpenMultiprocessing\Exceptions\ChildErrorException;
-use aventri\ProcOpenMultiprocessing\Exceptions\ChildException;
-use DateTime;
 use \Exception;
 
 /**
- * @package aventri\ProcOpenMultiprocessing;
+ * @package aventri\Multiprocessing;
  */
 abstract class SocketEventCommand extends EventCommand
 {
@@ -44,25 +41,25 @@ abstract class SocketEventCommand extends EventCommand
             $result = socket_read($socket, 1024);
 
             //don't try to unserialize if we have nothing ready from STDIN, this will save cpu cycles
-            if ($buffer === "") {
-                continue;
-            }
-            $data = unserialize($buffer);
-            if ($data === self::DEATH_SIGNAL) {
-                exit(0);
-            }
-            if ($data instanceof WakeTime) {
-                $this->wakeUpAt($data);
-                continue;
-            }
-            try {
-                $this->consume($data);
-            } catch (Exception $e) {
-                $ex = new ChildException($e);
-                $exception = serialize($ex);
-                fwrite(STDERR, $exception);
-                exit(1);
-            }
+//            if ($buffer === "") {
+//                continue;
+//            }
+//            $data = unserialize($buffer);
+//            if ($data === self::DEATH_SIGNAL) {
+//                exit(0);
+//            }
+//            if ($data instanceof WakeTime) {
+//                $this->wakeUpAt($data);
+//                continue;
+//            }
+//            try {
+//                $this->consume($data);
+//            } catch (Exception $e) {
+//                $ex = new ChildException($e);
+//                $exception = serialize($ex);
+//                fwrite(STDERR, $exception);
+//                exit(1);
+//            }
         }
     }
 
