@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
 
 namespace aventri\ProcOpenMultiprocessing;
 
@@ -8,10 +8,9 @@ use DateTime;
 use \Exception;
 
 /**
- * Inside a process script, StreamEventCommand interacts with the WorkerPool through streams.
  * @package aventri\ProcOpenMultiprocessing;
  */
-abstract class StreamEventCommand extends EventCommand
+abstract class SocketEventCommand extends EventCommand
 {
     public function error(Exception $e)
     {
@@ -34,21 +33,16 @@ abstract class StreamEventCommand extends EventCommand
     public function listen()
     {
         ob_end_clean();
-        $stdin = fopen('php://stdin', 'r');
-        stream_set_blocking($stdin, 0);
-        stream_set_blocking(STDERR, 0);
-        stream_set_timeout($stdin, 10);
+        $socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
+        $result = socket_connect($socket, "/tmp/" . __FILE__ . ".sock");
+
+
+
         $this->setupErrorHandler();
 
         while (true) {
-            $read = array($stdin);
-            $write = NULL;
-            $except = NULL;
-            stream_select($read, $write, $except, null);
-            $buffer = "";
-            while($f = stream_get_contents($stdin)) {
-                $buffer .= $f;
-            }
+            $result = socket_read($socket, 1024);
+
             //don't try to unserialize if we have nothing ready from STDIN, this will save cpu cycles
             if ($buffer === "") {
                 continue;
