@@ -4,10 +4,7 @@
 Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</strong> and
   <strong>structured</strong> PHP library for multiprocessing and async communication using streams.<br /> 
   PM relies on streams for communication with sub processes with no requirement on the PCNTL extension.  
-  
-<p align="center">
-    
-</p>
+ 
 
 ---
 
@@ -18,13 +15,18 @@ Proc Open Multiprocessing (PM) is a <strong>powerful</strong>, <strong>simple</s
   <a href="https://packagist.org/packages/aventri/proc-open-multiprocessing"><img src="https://img.shields.io/packagist/dt/aventri/proc-open-multiprocessing.svg" alt="Packagist" /></a>  
 </p>
 
-## Features
+### Features
 * Stream based multiprocessing using `worker` scripts 
 * Auto process scaling with `queues`
 * `Pipeline` processing with auto scaled steps
-* Parent process receives child `stack trace` in asynchronous error handler
 * Non blocking `rate limited queues` 
 * Simplified child script `debugging`
+
+### Other Benefits
+* Works with PHP 5.3+
+* No PCNTL requirement
+* Re uses processes for efficiency 
+* Parent process receives child stack trace in asynchronous error handler
 
 
 ## 8 Process Fibonacci Example:
