@@ -1,6 +1,6 @@
 # Multiprocessing
 
-<img src="https://aventri.github.io/multiprocessing/logo.svg" alt="Proc Open Multiprocessing" width="30%" align="left"/>
+<img src="./logo.svg" alt="Proc Open Multiprocessing" width="30%" align="left"/>
 Multiprocessing (MP) is a <strong>powerful</strong>, <strong>simple</strong> and
   <strong>structured</strong> PHP library for multiprocessing and async communication.<br />
   MP relies on streams for communication with sub processes with no requirement on the PCNTL extension.
