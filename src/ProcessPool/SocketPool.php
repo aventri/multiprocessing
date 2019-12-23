@@ -146,6 +146,7 @@ class SocketPool extends Pool implements PipelineStepInterface
             }
             return null;
         } else if ($data instanceof WakeTime) {
+            $this->subRunningJob();
             return null;
         } else {
             $this->runningJobs--;

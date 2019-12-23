@@ -5,6 +5,7 @@ namespace aventri\Multiprocessing\Queues;
 use aventri\Multiprocessing\IPC\WakeTime;
 use DateInterval;
 use DateTime;
+use InvalidArgumentException;
 use SplQueue;
 
 class RateLimitedQueue extends WorkQueue
@@ -22,8 +23,11 @@ class RateLimitedQueue extends WorkQueue
      */
     private $numAllowed;
 
-    public function __construct(DateInterval $timeFrame, $numAllowed = 1, $jobData = array())
+    public function __construct($numAllowed, DateInterval $timeFrame, $jobData = array())
     {
+        if (!is_int($numAllowed)){
+            throw new InvalidArgumentException("missing num allowed");
+        }
         $this->timeFrame = $timeFrame;
         $this->numAllowed = $numAllowed;
         $this->timeQueue = new SplQueue();

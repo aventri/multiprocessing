@@ -12,8 +12,8 @@ $workScript = "php  " . realpath(__DIR__) . "/proc_scripts/fibo_proc.php";
 $collected = PoolFactory::create([
     "task" => $workScript,
     "queue" => new RateLimitedQueue(
-        new DateInterval("PT5S"),
         4,
+        new DateInterval("PT5S"),
         range(1, 30)
     ),
     "num_processes" => 8,

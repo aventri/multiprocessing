@@ -75,7 +75,7 @@
 [Fibo Rate Limited]|[Fibo Proc]
 [Rate Limited Pipeline]|[Step 1 Fibo] -> [Step 2 Waste Time] -> [Step 3 Waste More Time]
 
-## Debugging Child Processes
+### Debugging Child Processes
 If you use `xdebug` to debug your php code with a remote interpreter you can debug both the parent and child script by adding adding
 the debug line provided by the `Debug` class.
 
@@ -91,6 +91,28 @@ $collected = PoolFactory::create([
 ])->start();
 ```  
 If you are using PHPStorm to debug you can now use the `serverName` as your `server` configuration and set up path mappings.
+
+### IPC Type
+Inter-process communication is done either using `streams` or `sockets`.
+By default MP will choose `streams` on all non windows operating systems and `sockets` on windows.
+If using windows you will need to enable the `sockets` php extension. If using linux or osx you can choose either IPC mechanism.
+```php
+//use the socket IPC
+$collected = PoolFactory::create([
+    "type" => Task::TYPE_SOCKET,
+    "task" => "php fibo.php",
+    "queue" => new WorkQueue(range(1, 30)),
+    "num_processes" => 8
+])->start();
+
+//use the stream IPC
+$collected = PoolFactory::create([
+    "type" => Task::TYPE_STREAM,
+    "task" => "php fibo.php",
+    "queue" => new WorkQueue(range(1, 30)),
+    "num_processes" => 8
+])->start();
+```
 
 [Simple Proc Pool]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/simple_proc_pool_example.php>
 [WorkerPool Pipeline]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/multi_worker_pool_stream.php>
