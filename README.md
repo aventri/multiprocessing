@@ -1,10 +1,10 @@
 # Multiprocessing
 
 <img src="./logo.svg" alt="Proc Open Multiprocessing" width="30%" align="left"/>
-Multiprocessing (MP) is a <strong>powerful</strong>, <strong>simple</strong> and
+<p>Multiprocessing (MP) is a <strong>powerful</strong>, <strong>simple</strong> and
   <strong>structured</strong> PHP library for multiprocessing and async communication.<br />
   MP relies on streams for communication with sub processes with no requirement on the PCNTL extension.
-  On Windows MP requires the PHP sockets extension for inter-process communication.
+  On Windows MP requires the PHP sockets extension for inter-process communication.</p>
  
 
 ---
