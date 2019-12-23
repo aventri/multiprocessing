@@ -13,8 +13,6 @@
     }
   },
   "require-dev": {
-    "ext-json": "*",
-    "ext-curl": "*",
     "szymach/c-pchart": "^3.0",
     "phpunit/phpunit": "6.5.14",
     "doctrine/instantiator": "1.0.5"
@@ -23,6 +21,8 @@
     "php": ">=5.3"
   },
   "suggest": {
-    "ext-sockets": "Required for use on windows"
+    "ext-sockets": "Required for use on windows",
+    "ext-curl": "Curl is used to run some examples",
+    "ext-json": "Json is used in examples"
   }
 }
