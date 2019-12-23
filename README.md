@@ -17,7 +17,7 @@ Multiprocessing (MP) is a <strong>powerful</strong>, <strong>simple</strong> and
 </p>
 
 ### Features
-* Stream based or Socket based multiprocessing using `worker` scripts
+* Stream based or Socket based inter-process communication multiprocessing using `worker` scripts
 * Auto process scaling with `queues`
 * `Pipeline` processing with auto scaled steps
 * Non blocking `rate limited queues` 
@@ -28,6 +28,7 @@ Multiprocessing (MP) is a <strong>powerful</strong>, <strong>simple</strong> and
 * No PCNTL requirement
 * Re uses processes for efficiency 
 * Parent process receives child stack trace in asynchronous error handler
+* Works on OSX, Linux and Windows
 
 
 ## 8 Process Fibonacci Example:
@@ -55,13 +56,13 @@ Multiprocessing (MP) is a <strong>powerful</strong>, <strong>simple</strong> and
     ```
 2. Use the `PoolFactory` class to create a Pool instance with 8 workers.
     ```php
-    $collected = (PoolFactory::create([
+    $collected = PoolFactory::create([
         "task" => "php fibo.php",
         "queue" => new WorkQueue(range(1, 30)),
         "num_processes" => 8,
         "done" => fn($data) => print($data . PHP_EOL),
         "error" => fn(Exception $e) => print($e->getTraceAsString() . PHP_EOL)
-    ]))->start();
+    ])->start();
     ```
 ---
 ## More Examples:
@@ -83,11 +84,11 @@ the debug line provided by the `Debug` class.
 $phpCommand = Debug::cli(["remote_port" => 9000, "serverName" => "SomeName"]);
 //use this in your command string
 $cmd = "$phpCommand fibo.php";
-$collected = (PoolFactory::create([
+$collected = PoolFactory::create([
     "task" => $cmd,
     "queue" => new WorkQueue(range(1, 30)),
     "num_processes" => 8
-]))->start();
+])->start();
 ```  
 If you are using PHPStorm to debug you can now use the `serverName` as your `server` configuration and set up path mappings.
 
