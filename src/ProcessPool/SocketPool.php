@@ -7,8 +7,6 @@ use aventri\Multiprocessing\IPC\SocketDataRequest;
 use aventri\Multiprocessing\IPC\SocketHead;
 use aventri\Multiprocessing\IPC\SocketInitializer;
 use aventri\Multiprocessing\IPC\SocketResponse;
-use aventri\Multiprocessing\Queues\RateLimitedQueue;
-use aventri\Multiprocessing\Queues\WorkQueue;
 use aventri\Multiprocessing\Tasks\EventTask;
 use Exception;
 
@@ -29,17 +27,6 @@ class SocketPool extends Pool
     private $killed = 0;
 
     /**
-     * @param $lineNumber
-     * @throws SocketException
-     */
-    private function throwSocketException($lineNumber)
-    {
-        $code = socket_last_error();
-        $message = socket_strerror($code);
-        throw new SocketException($message, $code, $severity = 1, $filename = __FILE__, $lineNumber);
-    }
-
-    /**
      * @inheritDoc
      * @throws SocketException
      */
@@ -52,15 +39,15 @@ class SocketPool extends Pool
         }
         $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
         if ($this->socket === false) {
-            $this->throwSocketException(__LINE__);
+            $this->throwSocketException(__FILE__, __LINE__);
         }
         $bound = socket_bind($this->socket, $this->socketFileName);
         if (!$bound) {
-            $this->throwSocketException(__LINE__);
+            $this->throwSocketException(__FILE__, __LINE__);
         }
         $listening = socket_listen($this->socket, self::BACKLOG);
         if (!$listening) {
-            $this->throwSocketException(__LINE__);
+            $this->throwSocketException(__FILE__, __LINE__);
         }
 
         for ($i = 0; $i < $this->numRetries; $i++) {
@@ -81,13 +68,14 @@ class SocketPool extends Pool
         return $this->collected;
     }
 
-    private function initializeNewProcs($new = array())
+    public final function initializeNewProcs($new = array())
     {
         if (count($new) === 0) return;
         foreach($new as $id) {
             $initializer = new SocketInitializer();
             $initializer->setUnixSocketFile($this->socketFileName);
             $initializer->setProcId($id);
+            $initializer->setPoolId($this->poolId);
             $proc = $this->procs[$id];
             $proc->tell(serialize($initializer). PHP_EOL);
         }
@@ -100,17 +88,17 @@ class SocketPool extends Pool
     {
         $spawn = socket_accept($this->socket);
         if ($spawn === false) {
-            $this->throwSocketException(__LINE__);
+            $this->throwSocketException(__FILE__, __LINE__);
         }
         $input = socket_read($spawn, SocketHead::HEADER_LENGTH);
         if ($input === false) {
-            $this->throwSocketException(__LINE__);
+            $this->throwSocketException(__FILE__, __LINE__);
         }
         /** @var SocketHead $head */
         $head = unserialize($input);
         $response = socket_read($spawn, $head->getBytes());
         if ($response === false) {
-            $this->throwSocketException(__LINE__);
+            $this->throwSocketException(__FILE__, __LINE__);
         }
         /** @var SocketResponse $response */
         $response = unserialize($response);
@@ -121,7 +109,7 @@ class SocketPool extends Pool
                 $item = $this->workQueue->dequeue();
                 $proc->setJobData($item);
                 $data = serialize($item);
-                $this->runningJobs++;
+                $this->addRunningJob();
                 $head = new SocketHead();
                 $head->setBytes(strlen($data));
                 $head = SocketHead::pad(serialize($head));
@@ -136,7 +124,14 @@ class SocketPool extends Pool
                 socket_write($spawn, $data, strlen($data));
                 $this->killed++;
             }
-        } else if ($data instanceof Exception) {
+        } else {
+            $this->dataRecieved($proc, $data);
+        }
+    }
+
+    public final function dataRecieved($proc, $data)
+    {
+        if ($data instanceof Exception) {
             $this->killed++;
             $this->retryData->enqueue($proc->getJobData());
             $this->runningJobs--;
@@ -150,6 +145,41 @@ class SocketPool extends Pool
                 call_user_func($this->doneHandler, $data);
             }
         }
+    }
+
+    public final function addRunningJob()
+    {
+        $this->runningJobs++;
+    }
+
+    public final function subRunningJob()
+    {
+        $this->runningJobs--;
+    }
+
+    public final function addKilled()
+    {
+        $this->killed++;
+    }
+
+    public final function getNumKilled()
+    {
+        return $this->killed;
+    }
+
+    public final function getNumProcs()
+    {
+        return count($this->procs);
+    }
+
+    public final function retry($data)
+    {
+        $this->retryData->enqueue($data);
+    }
+
+    public final function setUnixSocketFileName($fileName)
+    {
+        $this->socketFileName = $fileName;
     }
 
     /**

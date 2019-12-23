@@ -2,9 +2,10 @@
 
 namespace aventri\Multiprocessing\ProcessPool;
 
+use aventri\Multiprocessing\Mp;
 use InvalidArgumentException;
 
-abstract class PoolPipeline
+abstract class PoolPipeline extends Mp
 {
     /**
      * @var Pool[]

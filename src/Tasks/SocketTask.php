@@ -25,10 +25,6 @@ class SocketTask extends EventTask
      */
     private $socket;
     /**
-     * @var bool
-     */
-    private $connected;
-    /**
      * @var mixed
      */
     private $responseData;
@@ -40,6 +36,10 @@ class SocketTask extends EventTask
      * @var Task
      */
     private $consumer;
+    /**
+     * @var int
+     */
+    private $poolId;
 
     public function __construct(Task $consumer)
     {
@@ -69,6 +69,7 @@ class SocketTask extends EventTask
         $response = new SocketResponse();
         $response->setData($data);
         $response->setProcId($this->procId);
+        $response->setPoolId($this->poolId);
         $message = serialize($response);
         $head = new SocketHead();
         $head->setBytes(strlen($message));
@@ -98,6 +99,7 @@ class SocketTask extends EventTask
         $initializer = unserialize($buffer);
         $this->unixSocketFile = $initializer->getUnixSocketFile();
         $this->procId = $initializer->getProcId();
+        $this->poolId = $initializer->getPoolId();
         return $initializer;
     }
 
@@ -115,7 +117,7 @@ class SocketTask extends EventTask
         while (true) {
             $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
             $connected = socket_connect($this->socket, $this->unixSocketFile);
-            if (!$connected) exit(1);
+            if (!$connected) continue;
             $this->send(new SocketDataRequest());
             $data = $this->read();
             socket_close($this->socket);

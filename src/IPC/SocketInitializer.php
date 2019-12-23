@@ -8,10 +8,16 @@ final class SocketInitializer
      * @var string
      */
     public $unixSocketFile;
+
     /**
      * @var int
      */
     public $procId;
+
+    /**
+     * @var int
+     */
+    public $poolId;
 
     /**
      * @return string
@@ -43,5 +49,21 @@ final class SocketInitializer
     public function setProcId($procId)
     {
         $this->procId = $procId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPoolId()
+    {
+        return $this->poolId;
+    }
+
+    /**
+     * @param int $poolId
+     */
+    public function setPoolId($poolId)
+    {
+        $this->poolId = $poolId;
     }
 }

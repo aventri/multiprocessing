@@ -1,11 +1,8 @@
 <?php
 
 use aventri\Multiprocessing\Example\Steps\Pipeline1\StepInterface;
+use aventri\Multiprocessing\PipelineFactory;
 use aventri\Multiprocessing\PoolFactory;
-use aventri\Multiprocessing\ProcessPool\StreamPool;
-use aventri\Multiprocessing\ProcessPool\StreamPoolPipeline;
-use aventri\Multiprocessing\WorkerPool;
-use aventri\Multiprocessing\WorkerPoolPipeline;
 use aventri\Multiprocessing\Queues\WorkQueue;
 
 include realpath(__DIR__ . "/../vendor/") . "/autoload.php";
@@ -15,7 +12,7 @@ $step1 = "php " . realpath(__DIR__) . "/proc_scripts/pipeline_1_step1.php";
 $step2 = "php " . realpath(__DIR__) . "/proc_scripts/pipeline_1_step2.php";
 $step3 = "php " . realpath(__DIR__) . "/proc_scripts/pipeline_1_step3.php";
 
-$pipeline = new StreamPoolPipeline([
+$collected = PipelineFactory::create([
     PoolFactory::create([
         "task" => $step1,
         "queue" => new WorkQueue(range(1, 30)),
@@ -50,7 +47,6 @@ $pipeline = new StreamPoolPipeline([
             echo $e->getTraceAsString().PHP_EOL;
         }
     ])
-]);
+])->start();
 
-$collected = $pipeline->start();
 print_r($collected);

@@ -2,6 +2,7 @@
 
 namespace aventri\Multiprocessing\ProcessPool;
 
+use aventri\Multiprocessing\Mp;
 use aventri\Multiprocessing\Process;
 use aventri\Multiprocessing\Queues\WorkQueue;
 use InvalidArgumentException;
@@ -11,8 +12,12 @@ use InvalidArgumentException;
  * @package aventri\Multiprocessing\ProcessPool
  * @author Rich Wandell <richwandell@gmail.com>
  */
-abstract class Pool
+abstract class Pool extends Mp
 {
+    /**
+     * @var int
+     */
+    protected static $poolNum = 0;
     /**
      * @var int
      */
@@ -81,6 +86,10 @@ abstract class Pool
      * @var bool
      */
     protected $verbose = false;
+    /**
+     * @var int
+     */
+    protected $poolId;
 
     /**
      * Options are
@@ -124,6 +133,8 @@ abstract class Pool
         if (isset($options["verbose"]) && is_bool($options["verbose"])) {
             $this->verbose = $options["verbose"];
         }
+        $this->poolId = self::$poolNum;
+        self::$poolNum++;
     }
 
     /**
@@ -246,5 +257,10 @@ abstract class Pool
     public function getCollected()
     {
         return $this->collected;
+    }
+
+    public function getProc($id)
+    {
+        return $this->procs[$id];
     }
 }

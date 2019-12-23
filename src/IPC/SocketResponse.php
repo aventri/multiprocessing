@@ -9,6 +9,10 @@ final class SocketResponse
      */
     private $procId;
     /**
+     * @var int
+     */
+    private $poolId;
+    /**
      * @var mixed
      */
     private $data;
@@ -43,5 +47,21 @@ final class SocketResponse
     public function setProcId($procId)
     {
         $this->procId = $procId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPoolId()
+    {
+        return $this->poolId;
+    }
+
+    /**
+     * @param int $poolId
+     */
+    public function setPoolId($poolId)
+    {
+        $this->poolId = $poolId;
     }
 }
