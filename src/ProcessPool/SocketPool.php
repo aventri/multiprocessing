@@ -7,10 +7,13 @@ use aventri\Multiprocessing\IPC\SocketDataRequest;
 use aventri\Multiprocessing\IPC\SocketHead;
 use aventri\Multiprocessing\IPC\SocketInitializer;
 use aventri\Multiprocessing\IPC\SocketResponse;
+use aventri\Multiprocessing\IPC\WakeTime;
+use aventri\Multiprocessing\Process;
+use aventri\Multiprocessing\Queues\RateLimitedQueue;
 use aventri\Multiprocessing\Tasks\EventTask;
 use Exception;
 
-class SocketPool extends Pool
+class SocketPool extends Pool implements PipelineStepInterface
 {
     const BACKLOG = 30;
     /**
@@ -107,6 +110,9 @@ class SocketPool extends Pool
         if ($data instanceof SocketDataRequest) {
             if ($this->workQueue->count() > 0) {
                 $item = $this->workQueue->dequeue();
+                if (is_null($item) and $this->workQueue instanceof RateLimitedQueue) {
+                    $item = $this->workQueue->getWakeTime();
+                }
                 $proc->setJobData($item);
                 $data = serialize($item);
                 $this->addRunningJob();
@@ -129,7 +135,7 @@ class SocketPool extends Pool
         }
     }
 
-    public final function dataRecieved($proc, $data)
+    public final function dataRecieved(Process $proc, $data)
     {
         if ($data instanceof Exception) {
             $this->killed++;
@@ -138,12 +144,16 @@ class SocketPool extends Pool
             if (is_callable($this->errorHandler)) {
                 call_user_func($this->errorHandler, $data);
             }
+            return null;
+        } else if ($data instanceof WakeTime) {
+            return null;
         } else {
             $this->runningJobs--;
             $this->collected[] = $data;
             if (is_callable($this->doneHandler)) {
                 call_user_func($this->doneHandler, $data);
             }
+            return $data;
         }
     }
 

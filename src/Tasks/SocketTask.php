@@ -29,21 +29,17 @@ class SocketTask extends EventTask
      */
     private $responseData;
     /**
-     * @var int
-     */
-    private $procId;
-    /**
      * @var Task
      */
     private $consumer;
-    /**
-     * @var int
-     */
-    private $poolId;
 
-    public function __construct(Task $consumer)
+
+    public function __construct(Task $consumer, SocketInitializer $initializer)
     {
         $this->consumer = $consumer;
+        $this->unixSocketFile = $initializer->getUnixSocketFile();
+        $this->procId = $initializer->getProcId();
+        $this->poolId = $initializer->getPoolId();
     }
 
     public final function error(Exception $e)
@@ -91,18 +87,6 @@ class SocketTask extends EventTask
         return $data;
     }
 
-    private function getInitializer()
-    {
-        $stdin = fopen('php://stdin', 'r');
-        $buffer = fgets($stdin);
-        /** @var SocketInitializer $initializer */
-        $initializer = unserialize($buffer);
-        $this->unixSocketFile = $initializer->getUnixSocketFile();
-        $this->procId = $initializer->getProcId();
-        $this->poolId = $initializer->getPoolId();
-        return $initializer;
-    }
-
     /**
      * Start listening for incoming data from STDIN
      */
@@ -111,7 +95,6 @@ class SocketTask extends EventTask
         if (!empty(ob_get_status())) {
             ob_end_clean();
         }
-        $this->getInitializer();
         $this->setupErrorHandler();
 
         while (true) {
@@ -128,6 +111,11 @@ class SocketTask extends EventTask
 
             if ($data instanceof WakeTime) {
                 $this->wakeUpAt($data);
+                $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
+                $connected = socket_connect($this->socket, $this->unixSocketFile);
+                if (!$connected) exit(1);
+                $this->send($this->responseData);
+                continue;
             }
 
             try {

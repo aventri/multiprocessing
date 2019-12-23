@@ -3,6 +3,7 @@
 namespace aventri\Multiprocessing\Tasks;
 
 use aventri\Multiprocessing\Exceptions\ChildException;
+use aventri\Multiprocessing\IPC\StreamInitializer;
 use aventri\Multiprocessing\IPC\WakeTime;
 use aventri\Multiprocessing\Task;
 use \Exception;
@@ -17,10 +18,17 @@ class StreamTask extends EventTask
      * @var Task
      */
     private $consumer;
+    /**
+     * @var resource
+     */
+    private $stdin;
 
-    public function __construct(Task $consumer)
+    public function __construct(Task $consumer, StreamInitializer $initializer, $stdin)
     {
         $this->consumer = $consumer;
+        $this->procId = $initializer->getProcId();
+        $this->poolId = $initializer->getPoolId();
+        $this->stdin = $stdin;
     }
 
     public function error(Exception $e)
@@ -43,8 +51,10 @@ class StreamTask extends EventTask
      */
     public function listen()
     {
-        ob_end_clean();
-        $stdin = fopen('php://stdin', 'r');
+        if (!empty(ob_get_status())) {
+            ob_end_clean();
+        }
+        $stdin = $this->stdin;
         stream_set_blocking($stdin, 0);
         stream_set_blocking(STDERR, 0);
         stream_set_timeout($stdin, 10);

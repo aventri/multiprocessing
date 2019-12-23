@@ -3,6 +3,8 @@
 namespace aventri\Multiprocessing\Tasks;
 
 use aventri\Multiprocessing\Exceptions\ChildErrorException;
+use aventri\Multiprocessing\IPC\Initializer;
+use aventri\Multiprocessing\IPC\SocketInitializer;
 use aventri\Multiprocessing\IPC\WakeTime;
 use DateTime;
 use Exception;
@@ -14,6 +16,14 @@ abstract class EventTask
      * @var callable|null
      */
     private $oldErrorHandler;
+    /**
+     * @var int
+     */
+    protected $poolId;
+    /**
+     * @var int
+     */
+    protected $procId;
 
     protected function setupErrorHandler()
     {
@@ -38,5 +48,16 @@ abstract class EventTask
             time_sleep_until($time->getTime());
         }
         $this->write($time);
+    }
+
+    /**
+     * @return Initializer
+     */
+    protected function getInitializer($stdin)
+    {
+        $buffer = fgets($stdin);
+        /** @var Initializer $initializer */
+        $initializer = unserialize($buffer);
+        return $initializer;
     }
 }

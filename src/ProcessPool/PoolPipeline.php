@@ -5,7 +5,7 @@ namespace aventri\Multiprocessing\ProcessPool;
 use aventri\Multiprocessing\Mp;
 use InvalidArgumentException;
 
-abstract class PoolPipeline extends Mp
+abstract class PoolPipeline extends Mp implements JobStartInterface
 {
     /**
      * @var Pool[]
@@ -22,6 +22,9 @@ abstract class PoolPipeline extends Mp
         $this->procWorkerPools = $pools;
     }
 
+    /**
+     * @inheritDoc
+     */
     public abstract function start();
 
     protected abstract function process();

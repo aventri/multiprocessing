@@ -2,22 +2,12 @@
 
 namespace aventri\Multiprocessing\IPC;
 
-final class SocketInitializer
+final class SocketInitializer extends Initializer
 {
     /**
      * @var string
      */
     public $unixSocketFile;
-
-    /**
-     * @var int
-     */
-    public $procId;
-
-    /**
-     * @var int
-     */
-    public $poolId;
 
     /**
      * @return string
@@ -33,37 +23,5 @@ final class SocketInitializer
     public function setUnixSocketFile($unixSocketFile)
     {
         $this->unixSocketFile = $unixSocketFile;
-    }
-
-    /**
-     * @return int
-     */
-    public function getProcId()
-    {
-        return $this->procId;
-    }
-
-    /**
-     * @param int $procId
-     */
-    public function setProcId($procId)
-    {
-        $this->procId = $procId;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPoolId()
-    {
-        return $this->poolId;
-    }
-
-    /**
-     * @param int $poolId
-     */
-    public function setPoolId($poolId)
-    {
-        $this->poolId = $poolId;
     }
 }

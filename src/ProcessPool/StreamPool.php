@@ -2,6 +2,8 @@
 
 namespace aventri\Multiprocessing\ProcessPool;
 
+use aventri\Multiprocessing\IPC\SocketInitializer;
+use aventri\Multiprocessing\IPC\StreamInitializer;
 use aventri\Multiprocessing\IPC\WakeTime;
 use aventri\Multiprocessing\Queues\RateLimitedQueue;
 use aventri\Multiprocessing\Tasks\EventTask;
@@ -9,7 +11,7 @@ use aventri\Multiprocessing\Tasks\EventTask;
 /**
  * @package aventri\Multiprocessing;
  */
-class StreamPool extends Pool
+class StreamPool extends Pool implements PipelineStepInterface
 {
     /**
      * Start the work pool
@@ -23,7 +25,8 @@ class StreamPool extends Pool
                 $this->workQueue->enqueue($item);
             }
             while ($this->workQueue->count() > 0) {
-                $this->createProcs();
+                $new = $this->createProcs();
+                $this->initializeNewProcs($new);
                 $this->sendJobs();
                 $this->process();
             }
@@ -43,6 +46,18 @@ class StreamPool extends Pool
         $this->free = array();
 
         return $this->collected;
+    }
+
+    public final function initializeNewProcs($new = array())
+    {
+        if (count($new) === 0) return;
+        foreach($new as $id) {
+            $initializer = new StreamInitializer();
+            $initializer->setProcId($id);
+            $initializer->setPoolId($this->poolId);
+            $proc = $this->procs[$id];
+            $proc->tell(serialize($initializer). PHP_EOL);
+        }
     }
 
     protected function killFree()

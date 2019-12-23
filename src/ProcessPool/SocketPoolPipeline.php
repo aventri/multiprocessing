@@ -6,6 +6,8 @@ use aventri\Multiprocessing\Exceptions\SocketException;
 use aventri\Multiprocessing\IPC\SocketDataRequest;
 use aventri\Multiprocessing\IPC\SocketHead;
 use aventri\Multiprocessing\IPC\SocketResponse;
+use aventri\Multiprocessing\IPC\WakeTime;
+use aventri\Multiprocessing\Queues\RateLimitedQueue;
 use aventri\Multiprocessing\Tasks\EventTask;
 use Exception;
 use InvalidArgumentException;
@@ -122,6 +124,9 @@ class SocketPoolPipeline extends PoolPipeline
             $workQueue = $pool->getWorkQueue();
             if ($workQueue->count() > 0) {
                 $item = $workQueue->dequeue();
+                if (is_null($item) and $workQueue instanceof RateLimitedQueue) {
+                    $item = $workQueue->getWakeTime();
+                }
                 $proc->setJobData($item);
                 $data = serialize($item);
                 $pool->addRunningJob();
@@ -140,7 +145,7 @@ class SocketPoolPipeline extends PoolPipeline
                 $pool->addKilled();
             }
         } else {
-            $pool->dataRecieved($proc, $data);
+            $data = $pool->dataRecieved($proc, $data);
             if (!is_null($data)) {
                 if (isset($this->procWorkerPools[$poolId + 1])) {
                     $this->procWorkerPools[$poolId + 1]->getWorkQueue()->enqueue($data);
