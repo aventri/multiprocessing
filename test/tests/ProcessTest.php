@@ -2,6 +2,7 @@
 
 use aventri\Multiprocessing\Process;
 use aventri\Multiprocessing\StreamEventCommand;
+use aventri\Multiprocessing\Tasks\EventTask;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -30,6 +31,9 @@ class ProcessTest extends TestCase
         stream_select($streams, $write, $expect, null);
     }
 
+    /**
+     * @group Linux
+     */
     public function testEcho()
     {
         $message = "echo";
@@ -40,7 +44,7 @@ class ProcessTest extends TestCase
         $response = unserialize($this->process->listen());
         $this->assertSame($message, $response);
 
-        $this->process->tell(serialize(StreamEventCommand::DEATH_SIGNAL));
+        $this->process->tell(serialize(EventTask::DEATH_SIGNAL));
         $this->wait([$pipes[1], $pipes[2]]);
         $active = $this->process->isActive();
         $this->assertFalse($active);
