@@ -1,6 +1,8 @@
 {
   "name": "aventri/multiprocessing",
   "description": "Multiprocessing library using streams or unix sockets for inter-process communication.",
+  "type": "library",
+  "homepage": "https://aventri.github.io/multiprocessing/",
   "autoload": {
     "psr-4": {
       "aventri\\Multiprocessing\\": "src/"
@@ -15,7 +17,8 @@
   "require-dev": {
     "szymach/c-pchart": "^3.0",
     "phpunit/phpunit": "6.5.14",
-    "doctrine/instantiator": "1.0.5"
+    "doctrine/instantiator": "1.0.5",
+    "zetacomponents/system-information": "*"
   },
   "require": {
     "php": ">=5.3"

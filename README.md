@@ -92,8 +92,8 @@ $collected = PoolFactory::create([
 ```  
 If you are using PHPStorm to debug you can now use the `serverName` as your `server` configuration and set up path mappings.
 
-### IPC Type
-Inter-process communication is done either using `streams` or `sockets`.
+## IPC
+**Inter-process communication** is done either using `streams` or `sockets`.
 By default MP will choose `streams` on all non windows operating systems and `sockets` on windows.
 If using windows you will need to enable the `sockets` php extension. If using linux or osx you can choose either IPC mechanism.
 ```php
@@ -113,6 +113,11 @@ $collected = PoolFactory::create([
     "num_processes" => 8
 ])->start();
 ```
+IPC can add time to process execution due to the communication overhead. We tested the difference in communication overhead using 
+ the [Speed Test] parent script and the [Echo Proc] child script. On average `streams` outperform `sockets` by about *16%*.
+ While `streams` is a faster IPC type in the simple echo test, IPC communication overhead difference becomes less important with 
+ real world work loads.  
+
 
 [Simple Proc Pool]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/simple_proc_pool_example.php>
 [WorkerPool Pipeline]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/multi_worker_pool_stream.php>
@@ -125,3 +130,5 @@ $collected = PoolFactory::create([
 [Step 3 Waste More Time]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/pipeline_1_step3.php>
 [Download Stock Data]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/pipeline_2_step1.php>
 [Draw Stock Charts]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/pipeline_2_step2.php>
+[Speed Test]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/pipeline_2_step2.php>
+[Echo Proc]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/proc_scripts/echo_proc.php>

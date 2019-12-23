@@ -31,25 +31,27 @@ class StreamTask extends EventTask
         $this->stdin = $stdin;
     }
 
-    public function error(Exception $e)
+    /**
+     * @inheritDoc
+     */
+    public final function error(Exception $e)
     {
         fwrite(STDERR, serialize($e));
         exit(1);
     }
 
     /**
-     * Writes the data to the output stream.
-     * @param mixed $data
+     * @inheritDoc
      */
-    public function write($data)
+    public final function write($data)
     {
         echo serialize($data);
     }
 
     /**
-     * Start listening for incoming data from STDIN
+     * @inheritDoc
      */
-    public function listen()
+    public final function listen()
     {
         if (!empty(ob_get_status())) {
             ob_end_clean();

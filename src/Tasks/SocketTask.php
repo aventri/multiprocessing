@@ -42,6 +42,9 @@ class SocketTask extends EventTask
         $this->poolId = $initializer->getPoolId();
     }
 
+    /**
+     * @inheritDoc
+     */
     public final function error(Exception $e)
     {
         $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
@@ -52,8 +55,7 @@ class SocketTask extends EventTask
     }
 
     /**
-     * Writes the data to the output stream.
-     * @param mixed $data
+     * @inheritDoc
      */
     public final function write($data)
     {
@@ -88,7 +90,7 @@ class SocketTask extends EventTask
     }
 
     /**
-     * Start listening for incoming data from STDIN
+     * @inheritDoc
      */
     public final function listen()
     {

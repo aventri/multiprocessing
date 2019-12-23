@@ -2,6 +2,8 @@
 
 namespace aventri\Multiprocessing;
 
+use aventri\Multiprocessing\ProcessPool\Pool;
+use aventri\Multiprocessing\ProcessPool\PoolPipeline;
 use aventri\Multiprocessing\ProcessPool\SocketPoolPipeline;
 use aventri\Multiprocessing\ProcessPool\StreamPool;
 use aventri\Multiprocessing\ProcessPool\StreamPoolPipeline;
@@ -9,6 +11,10 @@ use InvalidArgumentException;
 
 final class PipelineFactory
 {
+    /**
+     * @param Pool[] $pools
+     * @return PoolPipeline
+     */
     public static final function create($pools = array())
     {
         $same = true;

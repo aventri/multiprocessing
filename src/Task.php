@@ -2,16 +2,14 @@
 
 namespace aventri\Multiprocessing;
 
+use aventri\Multiprocessing\IPC\Initializer;
 use aventri\Multiprocessing\IPC\SocketInitializer;
 use aventri\Multiprocessing\IPC\StreamInitializer;
-use aventri\Multiprocessing\ProcessPool\SocketPool;
-use aventri\Multiprocessing\ProcessPool\StreamPool;
 use aventri\Multiprocessing\Tasks\EventTask;
 use aventri\Multiprocessing\Tasks\SocketTask;
 use aventri\Multiprocessing\Tasks\StreamTask;
-use Exception;
 
-abstract class Task extends EventTask
+abstract class Task implements TaskInterface
 {
     const TYPE_SOCKET = "SOCKET";
     const TYPE_STREAM = "STREAM";
@@ -20,6 +18,9 @@ abstract class Task extends EventTask
      */
     private $task;
 
+    /**
+     * @inheritDoc
+     */
     public function listen($type = null)
     {
         $stdin = fopen('php://stdin', 'r');
@@ -33,20 +34,27 @@ abstract class Task extends EventTask
         $this->task->listen();
     }
 
-    public function error(Exception $e)
-    {
-        $this->task->error($e);
-    }
-
+    /**
+     * @inheritDoc
+     */
     public function write($data)
     {
         $this->task->write($data);
     }
 
     /**
-     * When a stream event is received, the consume method is called.
-     * @param mixed $data
-     * @return mixed
+     * @inheritDoc
      */
     abstract function consume($data);
+
+    /**
+     * @return Initializer
+     */
+    protected function getInitializer($stdin)
+    {
+        $buffer = fgets($stdin);
+        /** @var Initializer $initializer */
+        $initializer = unserialize($buffer);
+        return $initializer;
+    }
 }

@@ -49,15 +49,4 @@ abstract class EventTask
         }
         $this->write($time);
     }
-
-    /**
-     * @return Initializer
-     */
-    protected function getInitializer($stdin)
-    {
-        $buffer = fgets($stdin);
-        /** @var Initializer $initializer */
-        $initializer = unserialize($buffer);
-        return $initializer;
-    }
 }
