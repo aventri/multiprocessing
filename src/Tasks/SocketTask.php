@@ -3,6 +3,7 @@
 namespace aventri\Multiprocessing\Tasks;
 
 use aventri\Multiprocessing\Exceptions\ChildException;
+use aventri\Multiprocessing\Exceptions\SocketException;
 use aventri\Multiprocessing\IPC\SocketDataRequest;
 use aventri\Multiprocessing\IPC\SocketHead;
 use aventri\Multiprocessing\IPC\SocketInitializer;
@@ -47,9 +48,6 @@ class SocketTask extends EventTask
      */
     public final function error(Exception $e)
     {
-        $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
-        $connected = socket_connect($this->socket, $this->unixSocketFile);
-        if (!$connected) exit(1);
         $this->send($e);
         exit(1);
     }
@@ -66,16 +64,15 @@ class SocketTask extends EventTask
     {
         $response = new SocketResponse();
         $response->setData($data);
-        $response->setProcId($this->procId);
-        $response->setPoolId($this->poolId);
         $message = serialize($response);
         $head = new SocketHead();
-        $head->setBytes(strlen($message));
+        $head->setProcId($this->procId);
+        $head->setPoolId($this->poolId);
+        $dataLength = strlen($message);
+        $head->setBytes($dataLength);
         $head = SocketHead::pad(serialize($head));
-        $w1 = socket_write($this->socket, $head, SocketHead::HEADER_LENGTH);
+        $w1 = socket_write($this->socket, $head.$message, SocketHead::HEADER_LENGTH + $dataLength);
         if ($w1 === false) return false;
-        $w2 = socket_write($this->socket, $message, strlen($message));
-        if ($w2 === false) return false;
         return true;
     }
 
@@ -98,14 +95,20 @@ class SocketTask extends EventTask
             ob_end_clean();
         }
         $this->setupErrorHandler();
+        $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
+        $connected = socket_connect($this->socket, $this->unixSocketFile);
+        if (!$connected) {
+            throw new SocketException("socket not connected");
+        }
+        $header = new SocketHead();
+        $header->setBytes(0);
+        $header->setPoolId($this->poolId);
+        $header->setProcId($this->procId);
+        $message = SocketHead::pad(serialize($header));
+        socket_write($this->socket, $message, SocketHead::HEADER_LENGTH);
 
         while (true) {
-            $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
-            $connected = socket_connect($this->socket, $this->unixSocketFile);
-            if (!$connected) continue;
-            $this->send(new SocketDataRequest());
             $data = $this->read();
-            socket_close($this->socket);
 
             if ($data === self::DEATH_SIGNAL) {
                 exit(0);
@@ -113,24 +116,16 @@ class SocketTask extends EventTask
 
             if ($data instanceof WakeTime) {
                 $this->wakeUpAt($data);
-                $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
-                $connected = socket_connect($this->socket, $this->unixSocketFile);
-                if (!$connected) exit(1);
                 $this->send($this->responseData);
                 continue;
             }
 
             try {
                 $this->consumer->consume($data);
-                $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
-                $connected = socket_connect($this->socket, $this->unixSocketFile);
-                if (!$connected) exit(1);
                 $this->send($this->responseData);
             } catch (Exception $e) {
                 $ex = new ChildException($e);
                 $this->error($ex);
-            } finally {
-                socket_close($this->socket);
             }
         }
     }
