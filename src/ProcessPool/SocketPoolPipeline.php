@@ -145,7 +145,7 @@ class SocketPoolPipeline extends PoolPipeline
                 $pool->addKilled();
             }
         } else {
-            $data = $pool->dataRecieved($proc, $data);
+            $data = $pool->dataReceived($proc, $data);
             if (!is_null($data)) {
                 if (isset($this->procWorkerPools[$poolId + 1])) {
                     $this->procWorkerPools[$poolId + 1]->getWorkQueue()->enqueue($data);

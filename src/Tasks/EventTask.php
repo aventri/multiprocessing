@@ -32,7 +32,7 @@ abstract class EventTask
             $exception = new ChildErrorException($message, 0, $severity, $file, $line);
             $that->error($exception);
         };
-        $this->oldErrorHandler = set_error_handler($errorHandler, E_ALL);
+        $this->oldErrorHandler = set_error_handler($errorHandler, error_reporting());
     }
 
     public abstract function listen();

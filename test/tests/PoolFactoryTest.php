@@ -2,18 +2,20 @@
 
 use aventri\Multiprocessing\PoolFactory;
 use aventri\Multiprocessing\ProcessPool\SocketPool;
+use aventri\Multiprocessing\ProcessPool\StreamPool;
 use aventri\Multiprocessing\Queues\WorkQueue;
 use PHPUnit\Framework\TestCase;
 
 class PoolFactoryTest extends TestCase
 {
-    /**
-     * @group Windows
-     */
-    public function testGivesSocketWindows()
+    public function testGivesCorrectSocket()
     {
         $pool = PoolFactory::create(["task" => "", "queue" => new WorkQueue()]);
-        $this->assertInstanceOf(SocketPool::class, $pool);
+        if (IS_WINDOWS) {
+            $this->assertInstanceOf(SocketPool::class, $pool);
+        } else {
+            $this->assertInstanceOf(StreamPool::class, $pool);
+        }
     }
 
     public function testCreateArguments()
