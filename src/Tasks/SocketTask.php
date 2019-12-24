@@ -9,6 +9,7 @@ use aventri\Multiprocessing\IPC\SocketHead;
 use aventri\Multiprocessing\IPC\SocketInitializer;
 use aventri\Multiprocessing\IPC\SocketResponse;
 use aventri\Multiprocessing\IPC\WakeTime;
+use aventri\Multiprocessing\ProcessPool\SocketPool;
 use aventri\Multiprocessing\Task;
 use \Exception;
 
@@ -64,24 +65,16 @@ class SocketTask extends EventTask
     {
         $response = new SocketResponse();
         $response->setData($data);
+        $response->setProcId($this->procId);
+        $response->setPoolId($this->poolId);
         $message = serialize($response);
-        $head = new SocketHead();
-        $head->setProcId($this->procId);
-        $head->setPoolId($this->poolId);
         $dataLength = strlen($message);
-        $head->setBytes($dataLength);
-        $head = SocketHead::pad(serialize($head));
-        $w1 = socket_write($this->socket, $head.$message, SocketHead::HEADER_LENGTH + $dataLength);
-        if ($w1 === false) return false;
-        return true;
+        socket_write($this->socket, $message, $dataLength);
     }
 
     private function read()
     {
-        $result = socket_read($this->socket, SocketHead::HEADER_LENGTH);
-        /** @var SocketHead $head */
-        $head = unserialize($result);
-        $data = socket_read($this->socket, $head->getBytes());
+        $data = socket_read($this->socket, SocketPool::MAX_READ);
         $data = unserialize($data);
         return $data;
     }

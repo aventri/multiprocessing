@@ -15,6 +15,8 @@ use Exception;
 
 class SocketPool extends Pool implements PipelineStepInterface
 {
+    const MAX_READ = 1000000;
+
     const BACKLOG = 30;
     /**
      * @var string
@@ -109,10 +111,10 @@ class SocketPool extends Pool implements PipelineStepInterface
                 $this->allSockets[] = $readyToRead;
                 $this->free[] = $readyToRead;
             } else {
-                $input = socket_read($readyToRead, SocketHead::HEADER_LENGTH);
-                /** @var SocketHead $header */
-                $header = unserialize($input);
-                if ($header === false) {
+                $data = socket_read($readyToRead, self::MAX_READ);
+                /** @var SocketResponse $data */
+                $data = unserialize($data);
+                if ($data === false) {
                     $this->subRunningJob();
                     $this->killed++;
                     $this->socketsProcs[(int)$readySocket] = null;
@@ -120,10 +122,7 @@ class SocketPool extends Pool implements PipelineStepInterface
                     $this->allSockets[$index] = null;
                     $this->allSockets = array_values(array_filter($this->allSockets));
                 } else {
-                    $data = socket_read($readyToRead, $header->getBytes());
-                    /** @var SocketResponse $data */
-                    $data = unserialize($data);
-                    $proc = $this->procs[$header->getProcId()];
+                    $proc = $this->procs[$data->getProcId()];
                     $this->dataReceived($proc, $data->getData());
                     $this->free[] = $readyToRead;
                 }
@@ -150,20 +149,14 @@ class SocketPool extends Pool implements PipelineStepInterface
                 $proc->setJobData($item);
                 $data = serialize($item);
                 $this->addRunningJob();
-                $head = new SocketHead();
                 $dataSize = strlen($data);
-                $head->setBytes($dataSize);
-                $head = SocketHead::pad(serialize($head));
-                socket_write($socket, $head.$data, SocketHead::HEADER_LENGTH + $dataSize);
+                socket_write($socket, $data, $dataSize);
             } else {
                 if ($proc->getJobData() === EventTask::DEATH_SIGNAL) continue;
                 $proc->setJobData(EventTask::DEATH_SIGNAL);
                 $data = serialize(EventTask::DEATH_SIGNAL);
-                $head = new SocketHead();
                 $dataSize = strlen($data);
-                $head->setBytes($dataSize);
-                $head = SocketHead::pad(serialize($head));
-                socket_write($socket, $head.$data, SocketHead::HEADER_LENGTH + $dataSize);
+                socket_write($socket, $data, $dataSize);
             }
         }
     }
@@ -179,15 +172,11 @@ class SocketPool extends Pool implements PipelineStepInterface
                 break;
             }
             $proc = $this->socketsProcs[(int)$socket];
-
             if ($proc->getJobData() === EventTask::DEATH_SIGNAL) continue;
             $proc->setJobData(EventTask::DEATH_SIGNAL);
             $data = serialize(EventTask::DEATH_SIGNAL);
-            $head = new SocketHead();
             $dataSize = strlen($data);
-            $head->setBytes($dataSize);
-            $head = SocketHead::pad(serialize($head));
-            socket_write($socket, $head.$data, SocketHead::HEADER_LENGTH + $dataSize);
+            socket_write($socket, $data, $dataSize);
         }
     }
 
