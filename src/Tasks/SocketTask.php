@@ -63,11 +63,7 @@ class SocketTask extends EventTask
 
     private function send($data)
     {
-        $response = new SocketResponse();
-        $response->setData($data);
-        $response->setProcId($this->procId);
-        $response->setPoolId($this->poolId);
-        $message = serialize($response);
+        $message = serialize($data);
         $dataLength = strlen($message);
         socket_write($this->socket, $message, $dataLength);
     }

@@ -13,14 +13,14 @@ $cpuCount = ezcSystemInfo::getInstance()->cpuCount;
 $streamPool = PoolFactory::create([
     "type" => Task::TYPE_STREAM,
     "task" => $workScript,
-    "queue" => new WorkQueue(array_fill(0, 1000, 1)),
+    "queue" => new WorkQueue(array_fill(0, 100000, 1)),
     "num_processes" => $cpuCount
 ]);
 
 $socketPool = PoolFactory::create([
     "type" => Task::TYPE_SOCKET,
     "task" => $workScript,
-    "queue" => new WorkQueue(array_fill(0, 1000, 1)),
+    "queue" => new WorkQueue(array_fill(0, 100000, 1)),
     "num_processes" => $cpuCount
 ]);
 

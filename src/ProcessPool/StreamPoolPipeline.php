@@ -19,7 +19,8 @@ class StreamPoolPipeline extends PoolPipeline
             foreach ($this->procWorkerPools as $pool) {
                 $allSize += $pool->getWorkQueue()->count();
                 $allSize += $pool->getRunningJobs();
-                $pool->createProcs();
+                $new = $pool->createProcs();
+                $pool->initializeNewProcs($new);
                 $pool->sendJobs();
             }
             if ($allSize > 0) {
@@ -32,15 +33,12 @@ class StreamPoolPipeline extends PoolPipeline
     protected function process()
     {
         $poolIndex = array();
-        $stdIndex = array();
         $streams = array();
+        /** @var StreamPool $pool */
         foreach ($this->procWorkerPools as $pool) {
-            $stdOutPipes = $pool->getStdoutPipes();
-            $stdErrPipes = $pool->getStderrPipes();
-            $poolStreams = array_merge($stdOutPipes, $stdErrPipes);
-            $streams = array_merge($streams, $poolStreams);
+            $readPipes = $pool->getReadPipes();
+            $streams = array_merge($streams, $readPipes);
             $poolIndex[] = count($streams) - 1;
-            $stdIndex[] = array($stdOutPipes, $stdErrPipes);
         }
         $read = $streams;
         $write = null;
@@ -49,30 +47,21 @@ class StreamPoolPipeline extends PoolPipeline
         foreach ($read as $r) {
             $id = array_search($r, $streams);
             $whichPool = 0;
-            $poolStart = 0;
             for ($i = 0; $i < count($poolIndex); $i++) {
                 if ($id <= $poolIndex[$i]) {
                     $whichPool = $i;
-                    if (isset($poolIndex[$i - 1])) {
-                        $poolStart = $poolIndex[$i - 1] + 1;
-                    }
                     break;
                 }
             }
-            $procId = $id - $poolStart;
-            if ($id > ($poolStart + count($stdIndex[$whichPool][0]))) {
-                $this->procWorkerPools[$whichPool]->stdErr($procId);
-            } else {
-                $data = $this->procWorkerPools[$whichPool]->stdOut($procId);
+            $pool = $this->procWorkerPools[$whichPool];
+            $data = $pool->dataReceived($r);
+            if (!is_null($data)) {
                 if (!is_null($data)) {
                     if (isset($this->procWorkerPools[$whichPool + 1])) {
                         $this->procWorkerPools[$whichPool + 1]->getWorkQueue()->enqueue($data);
                     }
                 }
             }
-        }
-        foreach ($this->procWorkerPools as $pool) {
-            $pool->closeShouldClose();
         }
     }
 }

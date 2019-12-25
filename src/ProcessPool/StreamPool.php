@@ -5,6 +5,7 @@ namespace aventri\Multiprocessing\ProcessPool;
 use aventri\Multiprocessing\IPC\SocketInitializer;
 use aventri\Multiprocessing\IPC\StreamInitializer;
 use aventri\Multiprocessing\IPC\WakeTime;
+use aventri\Multiprocessing\Process;
 use aventri\Multiprocessing\Queues\RateLimitedQueue;
 use aventri\Multiprocessing\Tasks\EventTask;
 
@@ -13,6 +14,20 @@ use aventri\Multiprocessing\Tasks\EventTask;
  */
 class StreamPool extends Pool implements PipelineStepInterface
 {
+    /**
+     * @var Process[]
+     */
+    private $pipesProcs = array();
+
+    /**
+     * @var resource[]
+     */
+    private $readPipes = array();
+    /**
+     * @var resource[]
+     */
+    private $stdOutPipes = array();
+
     /**
      * Start the work pool
      * @return array
@@ -36,12 +51,27 @@ class StreamPool extends Pool implements PipelineStepInterface
             }
         }
 
-        for($i = 0; $i < count($this->procs); $i++){
-            $this->procs[$i]->tell(serialize(EventTask::DEATH_SIGNAL));
-            $this->closeProc($i);
-        }
+        while(true) {
+            $pipe = array_pop($this->readPipes);
+            if (is_null($pipe)) break;
 
-        $this->resetProcs();
+            $proc = $this->pipesProcs[(int)$pipe];
+            $proc->tell(serialize(EventTask::DEATH_SIGNAL));
+            $proc->close();
+            $pipes = $proc->getPipes();
+            $index = array_search($proc, $this->procs);
+            if ($index !== false) {
+                array_splice($this->procs, $index, 1);
+            }
+            $index = array_search($pipes[1], $this->readPipes);
+            if ($index !== false) {
+                array_splice($this->readPipes, $index, 1);
+            }
+            $index = array_search($pipes[2], $this->readPipes);
+            if ($index !== false) {
+                array_splice($this->readPipes, $index, 1);
+            }
+        }
 
         $this->free = array();
 
@@ -51,42 +81,42 @@ class StreamPool extends Pool implements PipelineStepInterface
     public final function initializeNewProcs($new = array())
     {
         if (count($new) === 0) return;
-        foreach($new as $id) {
+        foreach($new as $id => $proc) {
+            $pipes = $proc->getPipes();
+            foreach ($pipes as $pipe) {
+                $this->pipesProcs[(int)$pipe] = $proc;
+            }
+            $this->readPipes[] = $pipes[1];
+            $this->stdOutPipes[] = $pipes[1];
+            $this->readPipes[] = $pipes[2];
+            $this->free[] = $pipes[0];
             $initializer = new StreamInitializer();
             $initializer->setProcId($id);
             $initializer->setPoolId($this->poolId);
-            $proc = $this->procs[$id];
             $proc->tell(serialize($initializer). PHP_EOL);
         }
     }
 
     protected function killFree()
     {
-        $close = array();
         while(true) {
             $id = array_shift($this->free);
             if (is_null($id)) {
                 break;
             }
-            $proc = $this->procs[$id];
+            $proc = $this->pipesProcs[(int)$id];
             $proc->tell(serialize(EventTask::DEATH_SIGNAL));
-            $close[] = $id;
         }
-        foreach ($close as $id) {
-            $this->closeProc($id);
-        }
-        $this->resetProcs();
     }
 
     public function sendJobs()
     {
-        $close = array();
         while(true) {
             $id = array_shift($this->free);
             if (is_null($id)) {
                 break;
             }
-            $proc = $this->procs[$id];
+            $proc = $this->pipesProcs[(int)$id];
             if (is_null($proc)) {
                 continue;
             }
@@ -105,21 +135,16 @@ class StreamPool extends Pool implements PipelineStepInterface
                 }
             } else {
                 $proc->tell(serialize(EventTask::DEATH_SIGNAL));
-                $close[] = $id;
             }
         }
-        foreach ($close as $id) {
-            $this->closeProc($id);
-        }
-        $this->resetProcs();
     }
 
-    public final function stdOut($id)
+    public final function stdOut($r)
     {
-        $proc = $this->procs[$id];
-        $this->runningJobs--;
+        $proc = $this->pipesProcs[(int)$r];
         if ($proc->isActive()) {
-            $this->free[] = $id;
+            $this->runningJobs--;
+            $this->free[] = $r;
             $data = unserialize($proc->listen());
             if ($data instanceof WakeTime) {
                 return null;
@@ -133,12 +158,21 @@ class StreamPool extends Pool implements PipelineStepInterface
         return null;
     }
 
-    public final function stdErr($id)
+    public final function stdErr($r)
     {
-        $proc = $this->procs[$id];
+        $proc = $this->pipesProcs[(int)$r];
         if (!$proc->isActive()) {
+            $pipes = $proc->getPipes();
             $this->retryData->enqueue($proc->getJobData());
-            $this->closeProc($id);
+            $stdOutIndex = array_search($pipes[1], $this->readPipes);
+            array_splice($this->readPipes, $stdOutIndex, 1);
+            $stdErrIndex = array_search($pipes[2], $this->readPipes);
+            array_splice($this->readPipes, $stdErrIndex, 1);
+            $proc->close();
+            $index = array_search($proc, $this->procs);
+            if ($index !== false) {
+                array_splice($this->procs, $index, 1);
+            }
             return;
         }
         $errorTxt = $proc->getError();
@@ -152,31 +186,32 @@ class StreamPool extends Pool implements PipelineStepInterface
         if (is_callable($this->errorHandler)) {
             call_user_func($this->errorHandler, $error);
         }
-        $this->shouldClose[] = $id;
     }
 
     protected function process()
     {
-        $streams = array_merge($this->stdoutPipes, $this->stderrPipes);
+        $streams = $this->readPipes;
         $read = $streams;
         $write = null;
         $except = null;
         stream_select($read, $write, $except, null);
         foreach ($read as $r) {
-            $id = array_search($r, $streams);
-            $stdout = true;
-            if ($id > count($this->stdoutPipes) - 1) {
-                $stdout = false;
-                $id = $id - count($this->stdoutPipes);
-            }
-
-            if ($stdout) {
-                $this->stdOut($id);
-            } else {
-                $this->stdErr($id);
-            }
+            $this->dataReceived($r);
         }
+    }
 
-        $this->closeShouldClose();
+    public function getReadPipes()
+    {
+        return $this->readPipes;
+    }
+
+    public final function dataReceived($pipe)
+    {
+        $stdout = in_array($pipe, $this->stdOutPipes);
+        if ($stdout) {
+            return $this->stdOut($pipe);
+        } else {
+            $this->stdErr($pipe);
+        }
     }
 }

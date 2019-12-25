@@ -2,6 +2,7 @@
 
 namespace aventri\Multiprocessing\ProcessPool;
 
+use aventri\Multiprocessing\Example\Steps\Pipeline1\Step2;
 use aventri\Multiprocessing\Exceptions\SocketException;
 use aventri\Multiprocessing\IPC\SocketDataRequest;
 use aventri\Multiprocessing\IPC\SocketHead;
@@ -22,6 +23,18 @@ class SocketPoolPipeline extends PoolPipeline
      * @var resource
      */
     private $socket;
+    /**
+     * @var array
+     */
+    private $allSockets = array();
+    /**
+     * @var array
+     */
+    private $poolIdPool = array();
+    /**
+     * @var SocketPool[]
+     */
+    private $socketsPools = array();
 
     /**
      * @return array
@@ -31,6 +44,7 @@ class SocketPoolPipeline extends PoolPipeline
     {
         $tmpDir = sys_get_temp_dir();
         $this->socketFileName = "$tmpDir/ampipc-" . getmypid() . ".sock";
+        @unlink($this->socketFileName);
         if (file_exists($this->socketFileName)) {
             unlink($this->socketFileName);
         }
@@ -38,6 +52,7 @@ class SocketPoolPipeline extends PoolPipeline
         if ($this->socket === false) {
             $this->throwSocketException(__FILE__, __LINE__);
         }
+        $this->allSockets[] = [$this->socket];
         $bound = socket_bind($this->socket, $this->socketFileName);
         if (!$bound) {
             $this->throwSocketException(__FILE__, __LINE__);
@@ -48,51 +63,31 @@ class SocketPoolPipeline extends PoolPipeline
         }
 
         $allSize = 0;
+        /** @var SocketPool $pool */
         foreach ($this->procWorkerPools as $pool) {
             $allSize += $pool->getWorkQueue()->count();
             $allSize += $pool->getRunningJobs();
+            $this->poolIdPool[$pool->getPoolId()] = $pool;
+            $this->allSockets[] = array();
             $pool->setUnixSocketFileName($this->socketFileName);
         }
 
         while ($allSize > 0) {
             $allSize = 0;
+            /** @var SocketPool $pool */
             foreach ($this->procWorkerPools as $pool) {
                 $allSize += $pool->getWorkQueue()->count();
                 $allSize += $pool->getRunningJobs();
                 $new = $pool->createProcs();
                 $pool->initializeNewProcs($new);
+                $pool->sendJobs();
             }
             if ($allSize > 0) {
                 $this->process();
             }
         }
 
-        do {
-            $this->process();
-            list($numKilled, $numProcs) = $this->getKilledAndProcsCount();
-        }while($numKilled < $numProcs);
-
         return $this->procWorkerPools[count($this->procWorkerPools) - 1]->getCollected();
-    }
-
-    private function getKilledAndProcsCount()
-    {
-        $killed = 0;
-        $procs = 0;
-        foreach($this->procWorkerPools as $pool) {
-            $killed += $pool->getNumKilled();
-            $procs += $pool->getNumProcs();
-        }
-        return array($killed, $procs);
-    }
-
-    private function getAllQueueSize()
-    {
-        $allSize = 0;
-        foreach ($this->procWorkerPools as $pool) {
-            $allSize += $pool->getWorkQueue()->count();
-        }
-        return $allSize;
     }
 
     /**
@@ -100,55 +95,52 @@ class SocketPoolPipeline extends PoolPipeline
      */
     protected function process()
     {
-        $spawn = socket_accept($this->socket);
-        if ($spawn === false) {
-            $this->throwSocketException(__FILE__, __LINE__);
+        $read = array();
+        foreach ($this->allSockets as $allSocket) {
+            $read = array_merge($read, $allSocket);
         }
-        $input = socket_read($spawn, SocketHead::HEADER_LENGTH);
-        if ($input === false) {
-            $this->throwSocketException(__FILE__, __LINE__);
-        }
-        /** @var SocketHead $head */
-        $head = unserialize($input);
-        $response = socket_read($spawn, $head->getBytes());
-        if ($response === false) {
-            $this->throwSocketException(__FILE__, __LINE__);
-        }
-        /** @var SocketResponse $response */
-        $response = unserialize($response);
-        $data = $response->getData();
-        $poolId = $response->getPoolId();
-        $pool = $this->procWorkerPools[$poolId];
-        $proc = $pool->getProc($response->getProcId());
-        if ($data instanceof SocketDataRequest) {
-            $workQueue = $pool->getWorkQueue();
-            if ($workQueue->count() > 0) {
-                $item = $workQueue->dequeue();
-                if (is_null($item) and $workQueue instanceof RateLimitedQueue) {
-                    $item = $workQueue->getWakeTime();
-                }
-                $proc->setJobData($item);
-                $data = serialize($item);
-                $pool->addRunningJob();
-                $head = new SocketHead();
-                $head->setBytes(strlen($data));
-                $head = SocketHead::pad(serialize($head));
-                socket_write($spawn, $head, SocketHead::HEADER_LENGTH);
-                socket_write($spawn, $data, strlen($data));
+        $write  = null;
+        $except = NULL;
+        //wait for some socket activity
+        socket_select($read, $write, $except, null);
+        foreach($read as $readySocket) {
+            $readyToRead = $readySocket;
+            if ($readySocket === $this->allSockets[0][0]) {
+                //we have a new socket connection, save it
+                $readyToRead = socket_accept($this->socket);
+                $input = socket_read($readyToRead, SocketHead::HEADER_LENGTH);
+                /** @var SocketHead $header */
+                $header = unserialize($input);
+                $poolId = $header->getPoolId();
+                $this->allSockets[$poolId + 1][] = $readyToRead;
+                /** @var SocketPool $pool */
+                $pool = $this->poolIdPool[$poolId];
+                $this->socketsPools[(int)$readyToRead] = $pool;
+                $pool->newSocketConnected($header, $readyToRead);
             } else {
-                $data = serialize(EventTask::DEATH_SIGNAL);
-                $head = new SocketHead();
-                $head->setBytes(strlen($data));
-                $head = SocketHead::pad(serialize($head));
-                socket_write($spawn, $head, SocketHead::HEADER_LENGTH);
-                socket_write($spawn, $data, strlen($data));
-                $pool->addKilled();
-            }
-        } else {
-            $data = $pool->dataReceived($proc, $data);
-            if (!is_null($data)) {
-                if (isset($this->procWorkerPools[$poolId + 1])) {
-                    $this->procWorkerPools[$poolId + 1]->getWorkQueue()->enqueue($data);
+                $pool = $this->socketsPools[(int)$readyToRead];
+                $dataTmp = socket_read($readyToRead, SocketPool::MAX_READ);
+                $data = unserialize($dataTmp);
+                if ($data === false) {
+                    for($i = 1; $i < count($this->allSockets); $i++) {
+                        $index = array_search($readySocket, $this->allSockets[$i]);
+                        if ($index !== false) {
+                            array_splice($this->allSockets[$i], $index, 1);
+                            break;
+                        }
+                    }
+                    $pool->noDataReceived($readyToRead);
+                } else {
+                    $data = $pool->dataReceived($data, $readyToRead);
+                    $index = array_search($pool, $this->procWorkerPools);
+                    if ($index === 0 and $data->originalNumber == 30) {
+                        echo "hi";
+                    }
+                    if (!is_null($data)) {
+                        if (isset($this->procWorkerPools[$index + 1])) {
+                            $this->procWorkerPools[$index + 1]->getWorkQueue()->enqueue($data);
+                        }
+                    }
                 }
             }
         }

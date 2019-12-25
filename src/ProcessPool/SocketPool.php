@@ -3,12 +3,9 @@
 namespace aventri\Multiprocessing\ProcessPool;
 
 use aventri\Multiprocessing\Exceptions\SocketException;
-use aventri\Multiprocessing\IPC\SocketDataRequest;
 use aventri\Multiprocessing\IPC\SocketHead;
 use aventri\Multiprocessing\IPC\SocketInitializer;
-use aventri\Multiprocessing\IPC\SocketResponse;
 use aventri\Multiprocessing\IPC\WakeTime;
-use aventri\Multiprocessing\Process;
 use aventri\Multiprocessing\Queues\RateLimitedQueue;
 use aventri\Multiprocessing\Tasks\EventTask;
 use Exception;
@@ -77,19 +74,25 @@ class SocketPool extends Pool implements PipelineStepInterface
             }
             while ($this->workQueue->count() > 0) {
                 $new = $this->createProcs();
-                $this->free = array();
                 $this->initializeNewProcs($new);
                 $this->process();
                 $this->sendJobs();
             }
-            do {
+            while($this->runningJobs > 0) {
                 $this->killFree();
                 $this->process();
-            }while($this->runningJobs > 0 or $this->killed < count($this->procs));
+            }
         }
 
         unlink($this->socketFileName);
         return $this->collected;
+    }
+
+    public final function newSocketConnected(SocketHead $header, $socket)
+    {
+        $this->socketsProcs[(int)$socket] = $this->procs[$header->getProcId()];
+        $this->allSockets[] = $socket;
+        $this->free[] = $socket;
     }
 
     public function process()
@@ -107,27 +110,24 @@ class SocketPool extends Pool implements PipelineStepInterface
                 $input = socket_read($readyToRead, SocketHead::HEADER_LENGTH);
                 /** @var SocketHead $header */
                 $header = unserialize($input);
-                $this->socketsProcs[(int)$readyToRead] = $this->procs[$header->getProcId()];
-                $this->allSockets[] = $readyToRead;
-                $this->free[] = $readyToRead;
+                $this->newSocketConnected($header, $readyToRead);
             } else {
                 $data = socket_read($readyToRead, self::MAX_READ);
-                /** @var SocketResponse $data */
                 $data = unserialize($data);
                 if ($data === false) {
-                    $this->subRunningJob();
-                    $this->killed++;
-                    $this->socketsProcs[(int)$readySocket] = null;
-                    $index = array_search($readySocket, $this->allSockets);
-                    $this->allSockets[$index] = null;
-                    $this->allSockets = array_values(array_filter($this->allSockets));
+                    $this->noDataReceived($readyToRead);
                 } else {
-                    $proc = $this->procs[$data->getProcId()];
-                    $this->dataReceived($proc, $data->getData());
-                    $this->free[] = $readyToRead;
+                    $this->dataReceived($data, $readyToRead);
                 }
             }
         }
+    }
+
+    public function noDataReceived($socket)
+    {
+        $this->killed++;
+        $index = array_search($socket, $this->allSockets);
+        array_splice($this->allSockets, $index, 1);
     }
 
     public function sendJobs()
@@ -152,11 +152,12 @@ class SocketPool extends Pool implements PipelineStepInterface
                 $dataSize = strlen($data);
                 socket_write($socket, $data, $dataSize);
             } else {
-                if ($proc->getJobData() === EventTask::DEATH_SIGNAL) continue;
                 $proc->setJobData(EventTask::DEATH_SIGNAL);
                 $data = serialize(EventTask::DEATH_SIGNAL);
                 $dataSize = strlen($data);
                 socket_write($socket, $data, $dataSize);
+                $index = array_search($proc, $this->procs);
+                array_splice($this->procs, $index, 1);
             }
         }
     }
@@ -183,22 +184,22 @@ class SocketPool extends Pool implements PipelineStepInterface
     public final function initializeNewProcs($new = array())
     {
         if (count($new) === 0) return;
-        foreach($new as $id) {
+        foreach($new as $id => $proc) {
             $initializer = new SocketInitializer();
             $initializer->setUnixSocketFile($this->socketFileName);
             $initializer->setProcId($id);
             $initializer->setPoolId($this->poolId);
-            $proc = $this->procs[$id];
             $proc->tell(serialize($initializer) . PHP_EOL);
         }
     }
 
-    public final function dataReceived(Process $proc, $data)
+    public final function dataReceived($data, $socket)
     {
+        $proc = $this->socketsProcs[(int)$socket];
         if ($data instanceof Exception) {
             $this->killed++;
             $this->retryData->enqueue($proc->getJobData());
-            $this->runningJobs--;
+            $this->subRunningJob();
             if (is_callable($this->errorHandler)) {
                 call_user_func($this->errorHandler, $data);
             }
@@ -207,7 +208,8 @@ class SocketPool extends Pool implements PipelineStepInterface
             $this->subRunningJob();
             return null;
         } else {
-            $this->runningJobs--;
+            $this->free[] = $socket;
+            $this->subRunningJob();
             $this->collected[] = $data;
             if (is_callable($this->doneHandler)) {
                 call_user_func($this->doneHandler, $data);
@@ -224,11 +226,6 @@ class SocketPool extends Pool implements PipelineStepInterface
     public final function subRunningJob()
     {
         $this->runningJobs--;
-    }
-
-    public final function addKilled()
-    {
-        $this->killed++;
     }
 
     public final function getNumKilled()

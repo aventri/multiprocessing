@@ -39,10 +39,6 @@ abstract class Pool extends Mp implements JobStartInterface
      */
     protected $procTimeout = 120;
     /**
-     * @var array
-     */
-    protected $stdoutPipes = array();
-    /**
      * @var callable
      */
     protected $doneHandler;
@@ -50,10 +46,6 @@ abstract class Pool extends Mp implements JobStartInterface
      * @var callable
      */
     protected $errorHandler;
-    /**
-     * @var array
-     */
-    protected $stderrPipes = array();
     /**
      * @var array
      */
@@ -152,6 +144,14 @@ abstract class Pool extends Mp implements JobStartInterface
     public abstract function sendJobs();
 
     /**
+     * @return int
+     */
+    public function getPoolId()
+    {
+        return $this->poolId;
+    }
+
+    /**
      * Kills all processes listed in the free process array
      * @return null
      */
@@ -161,7 +161,7 @@ abstract class Pool extends Mp implements JobStartInterface
 
     /**
      * Creates child processes if there is work to do and we have not reached the process number limit.
-     * @return int[] The child process id's of all created processes
+     * @return Process[] The child process of all created processes
      */
     public final function createProcs()
     {
@@ -173,58 +173,12 @@ abstract class Pool extends Mp implements JobStartInterface
             }
             for ($x = 0; $x < $procsToCreate; $x++) {
                 $proc = new Process($this->command, $this->procTimeout);
-                $id = count($this->procs);
-                $this->free[] = $id;
                 $this->procs[] = $proc;
                 $proc->start();
-                $pipes = $proc->getPipes();
-                $this->stdoutPipes[] = $pipes[1];
-                $this->stderrPipes[] = $pipes[2];
-                $new[] = $id;
+                $new[] = $proc;
             }
         }
         return $new;
-    }
-
-    protected function closeProc($id)
-    {
-        fclose($this->stdoutPipes[$id]);
-        fclose($this->stderrPipes[$id]);
-        $this->procs[$id]->close();
-        $this->procs[$id] = null;
-        $this->stdoutPipes[$id] = null;
-        $this->stderrPipes[$id] = null;
-    }
-
-    protected function resetProcs()
-    {
-        $this->procs = array_values(array_filter($this->procs));
-        $this->stdoutPipes = array_values(array_filter($this->stdoutPipes));
-        $this->stderrPipes = array_values(array_filter($this->stderrPipes));
-    }
-
-    public final function closeShouldClose()
-    {
-        foreach ($this->shouldClose as $id) {
-            $this->closeProc($id);
-        }
-        $this->shouldClose = array();
-    }
-
-    /**
-     * @return resource[]
-     */
-    public final function getStdoutPipes()
-    {
-        return $this->stdoutPipes;
-    }
-
-    /**
-     * @return resource[]
-     */
-    public final function getStderrPipes()
-    {
-        return $this->stderrPipes;
     }
 
     /**
