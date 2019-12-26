@@ -1,17 +1,9 @@
 <?php /** @noinspection PhpComposerExtensionStubsInspection */
 
-namespace aventri\Multiprocessing\ProcessPool;
+namespace aventri\Multiprocessing\Pool;
 
-use aventri\Multiprocessing\Example\Steps\Pipeline1\Step2;
 use aventri\Multiprocessing\Exceptions\SocketException;
-use aventri\Multiprocessing\IPC\SocketDataRequest;
 use aventri\Multiprocessing\IPC\SocketHead;
-use aventri\Multiprocessing\IPC\SocketResponse;
-use aventri\Multiprocessing\IPC\WakeTime;
-use aventri\Multiprocessing\Queues\RateLimitedQueue;
-use aventri\Multiprocessing\Tasks\EventTask;
-use Exception;
-use InvalidArgumentException;
 
 class SocketPoolPipeline extends PoolPipeline
 {
@@ -133,9 +125,6 @@ class SocketPoolPipeline extends PoolPipeline
                 } else {
                     $data = $pool->dataReceived($data, $readyToRead);
                     $index = array_search($pool, $this->procWorkerPools);
-                    if ($index === 0 and $data->originalNumber == 30) {
-                        echo "hi";
-                    }
                     if (!is_null($data)) {
                         if (isset($this->procWorkerPools[$index + 1])) {
                             $this->procWorkerPools[$index + 1]->getWorkQueue()->enqueue($data);

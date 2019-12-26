@@ -2,7 +2,6 @@
 
 use aventri\Multiprocessing\PoolFactory;
 use aventri\Multiprocessing\Queues\RateLimitedQueue;
-use aventri\Multiprocessing\WorkerPool;
 
 include realpath(__DIR__ . "/../vendor/") . "/autoload.php";
 

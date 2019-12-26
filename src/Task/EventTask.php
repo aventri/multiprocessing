@@ -1,10 +1,8 @@
 <?php
 
-namespace aventri\Multiprocessing\Tasks;
+namespace aventri\Multiprocessing\Task;
 
 use aventri\Multiprocessing\Exceptions\ChildErrorException;
-use aventri\Multiprocessing\IPC\Initializer;
-use aventri\Multiprocessing\IPC\SocketInitializer;
 use aventri\Multiprocessing\IPC\WakeTime;
 use DateTime;
 use Exception;

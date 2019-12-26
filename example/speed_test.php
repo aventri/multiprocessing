@@ -2,8 +2,8 @@
 
 use aventri\Multiprocessing\PoolFactory;
 use aventri\Multiprocessing\Queues\WorkQueue;
-use aventri\Multiprocessing\Task;
-use aventri\Multiprocessing\ProcessPool\Pool;
+use aventri\Multiprocessing\Task\Task;
+use aventri\Multiprocessing\Pool\Pool;
 
 include realpath(__DIR__ . "/../vendor/") . "/autoload.php";
 

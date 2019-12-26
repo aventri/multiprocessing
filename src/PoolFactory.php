@@ -2,9 +2,10 @@
 
 namespace aventri\Multiprocessing;
 
-use aventri\Multiprocessing\ProcessPool\Pool;
-use aventri\Multiprocessing\ProcessPool\SocketPool;
-use aventri\Multiprocessing\ProcessPool\StreamPool;
+use aventri\Multiprocessing\Pool\Pool;
+use aventri\Multiprocessing\Pool\SocketPool;
+use aventri\Multiprocessing\Pool\StreamPool;
+use aventri\Multiprocessing\Task\Task;
 use InvalidArgumentException;
 
 final class PoolFactory

@@ -1,6 +1,6 @@
 <?php
 
-namespace aventri\Multiprocessing\ProcessPool;
+namespace aventri\Multiprocessing\Pool;
 
 interface JobStartInterface
 {

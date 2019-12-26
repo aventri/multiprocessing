@@ -1,13 +1,13 @@
 <?php /** @noinspection PhpComposerExtensionStubsInspection */
 
-namespace aventri\Multiprocessing\ProcessPool;
+namespace aventri\Multiprocessing\Pool;
 
 use aventri\Multiprocessing\Exceptions\SocketException;
 use aventri\Multiprocessing\IPC\SocketHead;
 use aventri\Multiprocessing\IPC\SocketInitializer;
 use aventri\Multiprocessing\IPC\WakeTime;
 use aventri\Multiprocessing\Queues\RateLimitedQueue;
-use aventri\Multiprocessing\Tasks\EventTask;
+use aventri\Multiprocessing\Task\EventTask;
 use Exception;
 
 class SocketPool extends Pool implements PipelineStepInterface

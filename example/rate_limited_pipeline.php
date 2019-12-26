@@ -4,8 +4,6 @@ use aventri\Multiprocessing\Example\Steps\Pipeline1\StepInterface;
 use aventri\Multiprocessing\PipelineFactory;
 use aventri\Multiprocessing\PoolFactory;
 use aventri\Multiprocessing\Queues\RateLimitedQueue;
-use aventri\Multiprocessing\WorkerPool;
-use aventri\Multiprocessing\WorkerPoolPipeline;
 use aventri\Multiprocessing\Queues\WorkQueue;
 
 include realpath(__DIR__ . "/../vendor/") . "/autoload.php";

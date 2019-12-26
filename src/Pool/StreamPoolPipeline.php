@@ -1,8 +1,6 @@
 <?php
 
-namespace aventri\Multiprocessing\ProcessPool;
-
-use InvalidArgumentException;
+namespace aventri\Multiprocessing\Pool;
 
 class StreamPoolPipeline extends PoolPipeline
 {

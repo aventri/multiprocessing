@@ -1,16 +1,13 @@
 <?php /** @noinspection PhpComposerExtensionStubsInspection */
 
-namespace aventri\Multiprocessing\Tasks;
+namespace aventri\Multiprocessing\Task;
 
 use aventri\Multiprocessing\Exceptions\ChildException;
 use aventri\Multiprocessing\Exceptions\SocketException;
-use aventri\Multiprocessing\IPC\SocketDataRequest;
 use aventri\Multiprocessing\IPC\SocketHead;
 use aventri\Multiprocessing\IPC\SocketInitializer;
-use aventri\Multiprocessing\IPC\SocketResponse;
 use aventri\Multiprocessing\IPC\WakeTime;
-use aventri\Multiprocessing\ProcessPool\SocketPool;
-use aventri\Multiprocessing\Task;
+use aventri\Multiprocessing\Pool\SocketPool;
 use \Exception;
 
 /**

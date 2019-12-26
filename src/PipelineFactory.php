@@ -2,11 +2,11 @@
 
 namespace aventri\Multiprocessing;
 
-use aventri\Multiprocessing\ProcessPool\Pool;
-use aventri\Multiprocessing\ProcessPool\PoolPipeline;
-use aventri\Multiprocessing\ProcessPool\SocketPoolPipeline;
-use aventri\Multiprocessing\ProcessPool\StreamPool;
-use aventri\Multiprocessing\ProcessPool\StreamPoolPipeline;
+use aventri\Multiprocessing\Pool\Pool;
+use aventri\Multiprocessing\Pool\PoolPipeline;
+use aventri\Multiprocessing\Pool\SocketPoolPipeline;
+use aventri\Multiprocessing\Pool\StreamPool;
+use aventri\Multiprocessing\Pool\StreamPoolPipeline;
 use InvalidArgumentException;
 
 final class PipelineFactory

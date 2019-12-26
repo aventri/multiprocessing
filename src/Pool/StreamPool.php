@@ -1,13 +1,12 @@
 <?php
 
-namespace aventri\Multiprocessing\ProcessPool;
+namespace aventri\Multiprocessing\Pool;
 
-use aventri\Multiprocessing\IPC\SocketInitializer;
 use aventri\Multiprocessing\IPC\StreamInitializer;
 use aventri\Multiprocessing\IPC\WakeTime;
-use aventri\Multiprocessing\Process;
+use aventri\Multiprocessing\Process\Process;
 use aventri\Multiprocessing\Queues\RateLimitedQueue;
-use aventri\Multiprocessing\Tasks\EventTask;
+use aventri\Multiprocessing\Task\EventTask;
 
 /**
  * @package aventri\Multiprocessing;

@@ -1,11 +1,10 @@
 <?php
 
-namespace aventri\Multiprocessing\Tasks;
+namespace aventri\Multiprocessing\Task;
 
 use aventri\Multiprocessing\Exceptions\ChildException;
 use aventri\Multiprocessing\IPC\StreamInitializer;
 use aventri\Multiprocessing\IPC\WakeTime;
-use aventri\Multiprocessing\Task;
 use \Exception;
 
 /**

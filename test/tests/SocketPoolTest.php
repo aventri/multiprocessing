@@ -1,8 +1,8 @@
 <?php
 
-use aventri\Multiprocessing\ProcessPool\SocketPool;
+use aventri\Multiprocessing\Pool\SocketPool;
 use aventri\Multiprocessing\Queues\WorkQueue;
-use aventri\Multiprocessing\Task;
+use aventri\Multiprocessing\Task\Task;
 use PHPUnit\Framework\TestCase;
 
 class SocketPoolTest extends TestCase

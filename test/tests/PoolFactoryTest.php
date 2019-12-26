@@ -1,8 +1,8 @@
 <?php
 
 use aventri\Multiprocessing\PoolFactory;
-use aventri\Multiprocessing\ProcessPool\SocketPool;
-use aventri\Multiprocessing\ProcessPool\StreamPool;
+use aventri\Multiprocessing\Pool\SocketPool;
+use aventri\Multiprocessing\Pool\StreamPool;
 use aventri\Multiprocessing\Queues\WorkQueue;
 use PHPUnit\Framework\TestCase;
 

@@ -1,15 +1,15 @@
 <?php
 
-namespace aventri\Multiprocessing\ProcessPool;
+namespace aventri\Multiprocessing\Pool;
 
 use aventri\Multiprocessing\Mp;
-use aventri\Multiprocessing\Process;
+use aventri\Multiprocessing\Process\Process;
 use aventri\Multiprocessing\Queues\WorkQueue;
 use InvalidArgumentException;
 
 /**
  * Class Pool
- * @package aventri\Multiprocessing\ProcessPool
+ * @package aventri\Multiprocessing\Pool
  * @author Rich Wandell <richwandell@gmail.com>
  */
 abstract class Pool extends Mp implements JobStartInterface
