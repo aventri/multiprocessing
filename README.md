@@ -114,9 +114,8 @@ $collected = PoolFactory::create([
 ])->start();
 ```
 IPC can add time to process execution due to the communication overhead. We tested the difference in communication overhead using 
- the [Speed Test] parent script and the [Echo Proc] child script. On average `streams` outperform `sockets` by about *16%*.
- While `streams` is a faster IPC type in the simple echo test, IPC communication overhead difference becomes less important with 
- real world work loads.  
+ the [Speed Test] parent script and the [Echo Proc] child script. While `streams` is a faster IPC type in the simple echo test, 
+ IPC communication overhead difference becomes less important with real world work loads.  
 
 
 [Simple Proc Pool]: <https://github.com/aventri/proc-open-multiprocessing/blob/master/example/simple_proc_pool_example.php>
